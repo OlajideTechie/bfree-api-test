@@ -1,0 +1,39 @@
+{
+	"id": "48ad03ee-2fe4-42ba-9363-ef552ff7e870",
+	"name": "core-environment",
+	"values": [
+		{
+			"key": "url ",
+			"value": "https://staging-backend.bfree.com.ng/api/",
+			"enabled": true
+		},
+		{
+			"key": "Agent-token",
+			"value": "",
+			"enabled": true
+		},
+		{
+			"key": "Admin-token",
+			"value": "",
+			"enabled": true
+		},
+		{
+			"key": "refresh-token",
+			"value": "",
+			"enabled": true
+		},
+		{
+			"key": "customer-token",
+			"value": "",
+			"enabled": true
+		},
+		{
+			"key": "customer=refresh-token",
+			"value": "",
+			"enabled": true
+		}
+	],
+	"_postman_variable_scope": "environment",
+	"_postman_exported_at": "2021-05-30T17:51:39.618Z",
+	"_postman_exported_using": "Postman/8.5.1"
+}

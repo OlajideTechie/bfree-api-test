@@ -1,0 +1,140 @@
+{
+	"info": {
+		"_postman_id": "554fb2db-f19d-418d-89e5-aa0cf0a4dccd",
+		"name": "BEFREE-API-CORE",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "selfservice",
+			"item": [
+				{
+					"name": "Login as a customer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//Set access token as environment variable",
+									"const body = JSON.parse(responseBody);",
+									"const jsonData = pm.response.json();",
+									"pm.environment.set(\"customer-token\", body.data.authenticateCustomer.token);",
+									"pm.environment.set(\"customer=refresh-token\", body.data.authenticateCustomer.refresh);",
+									"",
+									"tests [\"Status Code is 200\"] = responseCode.code === 200;",
+									"",
+									"//second test case",
+									"",
+									"pm.test(\"Content-Type is present\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"});",
+									"",
+									"pm.test(\"Bosy contains customer Id \", function () {",
+									"    pm.expect(jsonData.data.authenticateCustomer.customer.id).to.eql(\"2ea64ac3-90f7-45af-82e5-3b3314e571ee\");",
+									"});",
+									"",
+									"pm.test(\"Body contains customer name \", function () {",
+									"    pm.expect(jsonData.data.authenticateCustomer.customer.name).to.eql(\"Michael  Sabastine\");",
+									"});",
+									"",
+									"pm.test(\"Body contains tokeng\", function () {",
+									"    pm.expect(pm.response.text()).to.include(\"token\");",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query authenticateCustomer ($phoneNumber: String!, $pin: String!) {\n    authenticateCustomer (phoneNumber: $phoneNumber, pin: $pin) {\n        token\n        refresh\n        refreshTokenExpiry\n        customer{\n            id\n            name\n        } \n        accessTokenExpiry\n  }\n\n}",
+								"variables": "{\n  \"phoneNumber\": \"9032651887\",\n  \"pin\": \"0707\"\n}"
+							}
+						},
+						"url": {
+							"raw": "{{url }}",
+							"host": [
+								"{{url }}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get customer loan balance",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = pm.response.json();",
+									"const partnerId = '89e47c63-406f-46a6-8f4f-82af8eb963cf'",
+									"const customer_name = \"Michael  Sabastine\"",
+									"const loan_id = \"1874263\"",
+									"const loan_balance = 30000",
+									"const account_Number = \"9901885879\"",
+									"",
+									"pm.test(\"Bosy contains customer name \", function () {",
+									"    pm.expect(jsonData.data.findOneCustomerByPhoneNumber.name).to.eql(customer_name);",
+									"});",
+									"",
+									"pm.test(\"Bosy contains customer loan id \", function () {",
+									"    pm.expect(jsonData.data.findOneCustomerByPhoneNumber.loanId).to.eql(loan_id);",
+									"});",
+									"",
+									"pm.test(\"Bosy contains customer loan balance \", function () {",
+									"    pm.expect(jsonData.data.findOneCustomerByPhoneNumber.balanceRemaining).to.eql(loan_balance);",
+									"});",
+									"",
+									"pm.test(\"Bosy contains customer partner id \", function () {",
+									"    pm.expect(jsonData.data.findOneCustomerByPhoneNumber.partnerId).to.eql(partnerId);",
+									"});",
+									"",
+									"pm.test(\"Bosy contains customer account number \", function () {",
+									"    pm.expect(jsonData.data.findOneCustomerByPhoneNumber.accountNumber).to.eql(account_Number);",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{customer-token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query findOneCustomerByPhoneNumber ($number: String!) {\n    findOneCustomerByPhoneNumber (number: $number) {\n            name\n            loanId\n            balanceRemaining\n            partnerId\n            id\n            accountNumber   \n        }\n        \n    }\n\n      \n              \n",
+								"variables": "{\n  \"number\": \"9032651887\"\n}"
+							}
+						},
+						"url": {
+							"raw": "{{url }}",
+							"host": [
+								"{{url }}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
