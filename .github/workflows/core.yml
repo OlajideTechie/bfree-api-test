@@ -25,5 +25,5 @@ jobs:
     # Run the POSTMAN collection
     - name: Run POSTMAN collection
       run: |
-       newman run bfree-core.json -e core-environment.json -r htmlextra 
+       newman run bfree-core.json -e core-environment.json
 
