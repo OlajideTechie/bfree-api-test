@@ -1,4 +1,4 @@
-name: rub api core test on staging
+name: run api core test on staging
 on:
   push:
     branches:
