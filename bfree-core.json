@@ -18,6 +18,7 @@
 									"//Set access token as environment variable",
 									"const body = JSON.parse(responseBody);",
 									"const jsonData = pm.response.json();",
+									"const agentId = '724123d0-dd4b-4cf0-8bae-9b50e52fef83'",
 									"pm.environment.set(\"customer-token\", body.data.authenticateCustomer.token);",
 									"pm.environment.set(\"customer=refresh-token\", body.data.authenticateCustomer.refresh);",
 									"",
@@ -30,14 +31,18 @@
 									"});",
 									"",
 									"pm.test(\"Bosy contains customer Id \", function () {",
-									"    pm.expect(jsonData.data.authenticateCustomer.customer.id).to.eql(\"2ea64ac3-90f7-45af-82e5-3b3314e571ee\");",
+									"    pm.expect(jsonData.data.authenticateCustomer.customer.id).to.eql(\"8b785c57-3f94-404c-b549-0cbe1c566f35\");",
+									"});",
+									"",
+									"pm.test(\"Bosy contains agent Id \", function () {",
+									"    pm.expect(jsonData.data.authenticateCustomer.customer.agentId).to.eql(agentId);",
 									"});",
 									"",
 									"pm.test(\"Body contains customer name \", function () {",
-									"    pm.expect(jsonData.data.authenticateCustomer.customer.name).to.eql(\"Michael  Sabastine\");",
+									"    pm.expect(jsonData.data.authenticateCustomer.customer.name).to.eql(\"Olajide - BFREE\");",
 									"});",
 									"",
-									"pm.test(\"Body contains tokeng\", function () {",
+									"pm.test(\"Body contains token\", function () {",
 									"    pm.expect(pm.response.text()).to.include(\"token\");",
 									"});",
 									""
@@ -52,8 +57,8 @@
 						"body": {
 							"mode": "graphql",
 							"graphql": {
-								"query": "query authenticateCustomer ($phoneNumber: String!, $pin: String!) {\n    authenticateCustomer (phoneNumber: $phoneNumber, pin: $pin) {\n        token\n        refresh\n        refreshTokenExpiry\n        customer{\n            id\n            name\n        } \n        accessTokenExpiry\n  }\n\n}",
-								"variables": "{\n  \"phoneNumber\": \"9032651887\",\n  \"pin\": \"0707\"\n}"
+								"query": "query authenticateCustomer ($id: String!, $pin: String!) {\n    authenticateCustomer (id: $id, pin: $pin) {\n        token\n        refresh\n        refreshTokenExpiry\n        customer{\n            id\n            name\n            loanId\n             agentId \n        } \n        accessTokenExpiry\n  }\n\n\n}",
+								"variables": "{\n  \"id\": \"8b785c57-3f94-404c-b549-0cbe1c566f35\",\n  \"pin\": \"0707\"\n}"
 							}
 						},
 						"url": {
@@ -74,10 +79,10 @@
 								"exec": [
 									"const jsonData = pm.response.json();",
 									"const partnerId = '89e47c63-406f-46a6-8f4f-82af8eb963cf'",
-									"const customer_name = \"Michael  Sabastine\"",
-									"const loan_id = \"1874263\"",
-									"const loan_balance = 30000",
-									"const account_Number = \"9901885879\"",
+									"const customer_name = \"Olajide - BFREE\"",
+									"const loan_id = \"2073000\"",
+									"const loan_balance = 50590",
+									"const account_Number = \"9920231071\"",
 									"",
 									"pm.test(\"Bosy contains customer name \", function () {",
 									"    pm.expect(jsonData.data.findOneCustomerByPhoneNumber.name).to.eql(customer_name);",
@@ -122,7 +127,7 @@
 							"mode": "graphql",
 							"graphql": {
 								"query": "query findOneCustomerByPhoneNumber ($number: String!) {\n    findOneCustomerByPhoneNumber (number: $number) {\n            name\n            loanId\n            balanceRemaining\n            partnerId\n            id\n            accountNumber   \n        }\n        \n    }\n\n      \n              \n",
-								"variables": "{\n  \"number\": \"9032651887\"\n}"
+								"variables": "{\n  \"number\": \"9032651880\"\n}"
 							}
 						},
 						"url": {
@@ -135,6 +140,29 @@
 					"response": []
 				}
 			]
+		}
+	],
+	"auth": {
+		"type": "bearer"
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
 		}
 	]
 }
