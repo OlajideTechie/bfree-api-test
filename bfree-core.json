@@ -1,7 +1,7 @@
 {
 	"info": {
 		"_postman_id": "554fb2db-f19d-418d-89e5-aa0cf0a4dccd",
-		"name": "BEFREE-API-CORE",
+		"name": "bfree-api-core",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
