@@ -27,8 +27,8 @@ jobs:
       run: |
         mkdir -p testResults
 
-    # Run the POSTMAN collection
-    - name: Run POSTMAN collection
+    # Run the collection
+    - name: Run Integration Tests
       run: |
        newman run bfree-core.json -e core-environment.json -r htmlextra --reporter-htmlextra-export testResults/core-api-testReport.html --reporter-htmlextra-darkTheme 
        
@@ -36,6 +36,6 @@ jobs:
     - name: Output the run Details
       uses: actions/upload-artifact@v2
       with: 
-       name: RunReports
+       name: TestReports
        path: testResults
     continue-on-error: true
