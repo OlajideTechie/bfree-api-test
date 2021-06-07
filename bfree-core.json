@@ -22,7 +22,7 @@
 									"pm.environment.set(\"customer-token\", body.data.authenticateCustomer.token);",
 									"pm.environment.set(\"customer=refresh-token\", body.data.authenticateCustomer.refresh);",
 									"",
-									"tests [\"Status Code is 200\"] = responseCode.code === 200;",
+									"tests [\"Status Code is 200\"] = responseCode.code === 201;",
 									"",
 									"//second test case",
 									"",
