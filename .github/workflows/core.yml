@@ -1,8 +1,8 @@
 name: run api core test on staging
 on:
-  push:
+  pull_request:
     branches:
-      - master
+      - olajide-br
 jobs:
   test-api:
     runs-on: ubuntu-latest
@@ -22,8 +22,20 @@ jobs:
        npm install -g newman
        npm install -g newman-reporter-htmlextra
 
+    # Make directory to upload the test results
+    - name: Make Directory for results
+      run: |
+        mkdir -p testResults
+
     # Run the POSTMAN collection
     - name: Run POSTMAN collection
       run: |
-       newman run bfree-core.json -e core-environment.json
+       newman run bfree-core.json -e core-environment.json -r htmlextra --reporter-htmlextra-export testResults/htmlreport.html --reporter-htmlextra-darkTheme  > testResults/runreport1.html 
+       
+    # Upload the contents of Test Results directory to workspace
+    - name: Output the run Details
+      uses: actions/upload-artifact@v2
+      with: 
+       name: RunReports
+       path: testResults
     continue-on-error: true
