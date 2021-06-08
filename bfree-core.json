@@ -1,7 +1,7 @@
 {
 	"info": {
 		"_postman_id": "554fb2db-f19d-418d-89e5-aa0cf0a4dccd",
-		"name": "bfree-api-core",
+		"name": "BEFREE-API-CORE",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -22,7 +22,7 @@
 									"pm.environment.set(\"customer-token\", body.data.authenticateCustomer.token);",
 									"pm.environment.set(\"customer=refresh-token\", body.data.authenticateCustomer.refresh);",
 									"",
-									"tests [\"Status Code is 200\"] = responseCode.code === 200;",
+									"tests [\"Status Code is 200\"] = responseCode.code === 201;",
 									"",
 									"//second test case",
 									"",
@@ -30,11 +30,11 @@
 									"    pm.response.to.have.header(\"Content-Type\");",
 									"});",
 									"",
-									"pm.test(\"Bosy contains customer Id \", function () {",
+									"pm.test(\"Body contains customer Id \", function () {",
 									"    pm.expect(jsonData.data.authenticateCustomer.customer.id).to.eql(\"8b785c57-3f94-404c-b549-0cbe1c566f35\");",
 									"});",
 									"",
-									"pm.test(\"Bosy contains agent Id \", function () {",
+									"pm.test(\"Body contains agent Id \", function () {",
 									"    pm.expect(jsonData.data.authenticateCustomer.customer.agentId).to.eql(agentId);",
 									"});",
 									"",
@@ -57,7 +57,7 @@
 						"body": {
 							"mode": "graphql",
 							"graphql": {
-								"query": "query authenticateCustomer ($id: String!, $pin: String!) {\n    authenticateCustomer (id: $id, pin: $pin) {\n        token\n        refresh\n        refreshTokenExpiry\n        customer{\n            id\n            name\n            loanId\n             agentId \n        } \n        accessTokenExpiry\n  }\n\n\n}",
+								"query": "query authenticateCustomer ($id: String!, $pin: String!) {\n    authenticateCustomer (id: $id, pin: $pin) {\n        token\n        refresh\n        refreshTokenExpiry\n        customer{\n            id\n            name\n            loanId\n             agentId\n             channel \n        } \n         \n        accessTokenExpiry\n  }\n\n}",
 								"variables": "{\n  \"id\": \"8b785c57-3f94-404c-b549-0cbe1c566f35\",\n  \"pin\": \"0707\"\n}"
 							}
 						},
