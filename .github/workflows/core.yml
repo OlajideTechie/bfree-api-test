@@ -30,7 +30,11 @@ jobs:
     # Run the collection
     - name: Run Integration Tests
       run: |
-       newman run bfree-core.json -e core-environment.json -r htmlextra --reporter-htmlextra-export testResults/core-api-testReport.html --reporter-htmlextra-darkTheme 
+       newman run bfree-core.json -e core-environment.json
+       
+    - name: Generate HTML Report
+      run: |
+       newman run bfree-core.json -e core-environment.json -r htmlextra --reporter-htmlextra-export testResults/core-api-testReport.html --reporter-htmlextra-darkTheme
        
     # Upload the contents of Test Results directory to workspace
     - name: Output the run Details
