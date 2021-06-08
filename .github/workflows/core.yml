@@ -42,13 +42,6 @@ jobs:
       with: 
        name: TestReports
        path: testResults
-         
-       uses: 8398a7/action-slack@v3
-       status: ${{ job.status }}
-       fields: repo,message,commit,author,action,eventName,ref,workflow,job,took # selectable (default: repo,message)
-    env:
-      SLACK_WEBHOOK_URL: ${{ secrets.https://hooks.slack.com/services/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}} # required
-      if: always() # Pick up events even if the job fails or is canceled.
 
        
  
