@@ -1,8 +1,8 @@
 name: run api core test on staging
 on:
-  pull_request:
+  push:
     branches:
-      - Olajide-br
+    - master
 jobs:
   test-api:
     runs-on: ubuntu-latest
