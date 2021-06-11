@@ -39,7 +39,7 @@
 									"});",
 									"",
 									"pm.test(\"Body contains customer name \", function () {",
-									"    pm.expect(jsonData.data.authenticateCustomer.customer.name).to.eql(\"Olajide - BFREE\");",
+									"    pm.expect(jsonData.data.authenticateCustomer.customer.name).to.eql(\"Olajide - BFRE\");",
 									"});",
 									"",
 									"pm.test(\"Body contains token\", function () {",
