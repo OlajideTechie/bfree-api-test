@@ -1,13 +1,52 @@
 {
 	"info": {
-		"_postman_id": "554fb2db-f19d-418d-89e5-aa0cf0a4dccd",
-		"name": "BEFREE-API-CORE",
+		"_postman_id": "22d51c9e-8f10-4f96-87ac-e8e38f713baa",
+		"name": "Bfree-Core",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
 			"name": "selfservice",
 			"item": [
+				{
+					"name": "Login as a customer with incorrect pin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const errorMessage = 'incorrect login details'",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Incorrect loagin details \", function () {",
+									"    pm.expect(jsonData.errors[0].message).to.eql(errorMessage);",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query authenticateCustomer ($id: String!, $pin: String!) {\n    authenticateCustomer (id: $id, pin: $pin) {\n        token\n        refresh\n        refreshTokenExpiry\n        customer{\n            id\n            name\n            loanId\n          accountNumber\n          bankName\n          systemId\n          risk\n             agentId\n             userId\n             systemId\n             channel \n             balanceRemaining\n             registeredTelephoneNumber\n             lastLoggedIn\n             guarantorName\n             guarantorTelephone\n             lga\n             state\n             partner{\n                 name\n             }\n             \n        } \n         \n        accessTokenExpiry\n  }\n\n}",
+								"variables": "{\n  \"id\": \"8b785c57-3f94-404c-b549-0cbe1c566f35\",\n  \"pin\": \"0001\"\n}"
+							}
+						},
+						"url": {
+							"raw": "{{url }}",
+							"host": [
+								"{{url }}"
+							]
+						}
+					},
+					"response": []
+				},
 				{
 					"name": "Login as a customer",
 					"event": [
@@ -18,11 +57,13 @@
 									"//Set access token as environment variable",
 									"const body = JSON.parse(responseBody);",
 									"const jsonData = pm.response.json();",
-									"const agentId = '724123d0-dd4b-4cf0-8bae-9b50e52fef83'",
+									"const agentId = 'd936fc1d-3d9f-4377-ab91-cb2a6bd32ee1'",
+									"const partner_name = 'FairMoney Inc'",
+									"const phone_number ='9032651880'",
+									"",
 									"pm.environment.set(\"customer-token\", body.data.authenticateCustomer.token);",
 									"pm.environment.set(\"customer=refresh-token\", body.data.authenticateCustomer.refresh);",
 									"",
-									"tests [\"Status Code is 200\"] = responseCode.code === 201;",
 									"",
 									"//second test case",
 									"",
@@ -39,12 +80,22 @@
 									"});",
 									"",
 									"pm.test(\"Body contains customer name \", function () {",
-									"    pm.expect(jsonData.data.authenticateCustomer.customer.name).to.eql(\"Olajide - BFREE\");",
+									"    pm.expect(jsonData.data.authenticateCustomer.customer.name).to.eql(\"Olajide Test\");",
 									"});",
 									"",
 									"pm.test(\"Body contains token\", function () {",
 									"    pm.expect(pm.response.text()).to.include(\"token\");",
 									"});",
+									"",
+									"",
+									"pm.test(\"Body contains partner name \", function () {",
+									"    pm.expect(jsonData.data.authenticateCustomer.customer.partner.name).to.eql(partner_name);",
+									"});",
+									"",
+									"pm.test(\"Body contains phonenumber \", function () {",
+									"    pm.expect(jsonData.data.authenticateCustomer.customer.registeredTelephoneNumber).to.eql(phone_number);",
+									"});",
+									"",
 									""
 								],
 								"type": "text/javascript"
@@ -57,7 +108,7 @@
 						"body": {
 							"mode": "graphql",
 							"graphql": {
-								"query": "query authenticateCustomer ($id: String!, $pin: String!) {\n    authenticateCustomer (id: $id, pin: $pin) {\n        token\n        refresh\n        refreshTokenExpiry\n        customer{\n            id\n            name\n            loanId\n             agentId\n             channel \n        } \n         \n        accessTokenExpiry\n  }\n\n}",
+								"query": "query authenticateCustomer ($id: String!, $pin: String!) {\n    authenticateCustomer (id: $id, pin: $pin) {\n        token\n        refresh\n        refreshTokenExpiry\n        customer{\n            id\n            name\n            loanId\n          accountNumber\n          bankName\n          systemId\n          risk\n             agentId\n             userId\n             systemId\n             channel \n             balanceRemaining\n             registeredTelephoneNumber\n             lastLoggedIn\n             guarantorName\n             guarantorTelephone\n             lga\n             state\n             partner{\n                 name\n             }\n             \n        } \n         \n        accessTokenExpiry\n  }\n\n}",
 								"variables": "{\n  \"id\": \"8b785c57-3f94-404c-b549-0cbe1c566f35\",\n  \"pin\": \"0707\"\n}"
 							}
 						},
@@ -79,32 +130,41 @@
 								"exec": [
 									"const jsonData = pm.response.json();",
 									"const partnerId = '89e47c63-406f-46a6-8f4f-82af8eb963cf'",
-									"const customer_name = \"Olajide - BFREE\"",
+									"const customer_name = \"Olajide Test\"",
 									"const loan_id = \"2073000\"",
-									"const loan_balance = 50590",
+									"const loan_balance = 20590",
 									"const account_Number = \"9920231071\"",
+									"const repay_amount = 50590",
+									"const loan_installmentId = '2121758'",
 									"",
-									"pm.test(\"Bosy contains customer name \", function () {",
+									"pm.test(\"Body contains customer name \", function () {",
 									"    pm.expect(jsonData.data.findOneCustomerByPhoneNumber.name).to.eql(customer_name);",
 									"});",
 									"",
-									"pm.test(\"Bosy contains customer loan id \", function () {",
+									"pm.test(\"Body contains customer loan id \", function () {",
 									"    pm.expect(jsonData.data.findOneCustomerByPhoneNumber.loanId).to.eql(loan_id);",
 									"});",
 									"",
-									"pm.test(\"Bosy contains customer loan balance \", function () {",
+									"pm.test(\"Body contains customer loan balance \", function () {",
 									"    pm.expect(jsonData.data.findOneCustomerByPhoneNumber.balanceRemaining).to.eql(loan_balance);",
 									"});",
 									"",
-									"pm.test(\"Bosy contains customer partner id \", function () {",
+									"pm.test(\"Body contains customer partner id \", function () {",
 									"    pm.expect(jsonData.data.findOneCustomerByPhoneNumber.partnerId).to.eql(partnerId);",
 									"});",
 									"",
-									"pm.test(\"Bosy contains customer account number \", function () {",
+									"pm.test(\"Body contains customer account number \", function () {",
 									"    pm.expect(jsonData.data.findOneCustomerByPhoneNumber.accountNumber).to.eql(account_Number);",
 									"});",
 									"",
-									""
+									"",
+									"pm.test(\"Body contains amount to repay \", function () {",
+									"    pm.expect(jsonData.data.findOneCustomerByPhoneNumber.instalments[0].totalAmountToRepay).to.eql(repay_amount);",
+									"});",
+									"",
+									"pm.test(\"Body contains loan_installmentId \", function () {",
+									"    pm.expect(jsonData.data.findOneCustomerByPhoneNumber.instalments[0].loanInstalmentId).to.eql(loan_installmentId);",
+									"});"
 								],
 								"type": "text/javascript"
 							}
@@ -126,7 +186,7 @@
 						"body": {
 							"mode": "graphql",
 							"graphql": {
-								"query": "query findOneCustomerByPhoneNumber ($number: String!) {\n    findOneCustomerByPhoneNumber (number: $number) {\n            name\n            loanId\n            balanceRemaining\n            partnerId\n            id\n            accountNumber   \n        }\n        \n    }\n\n      \n              \n",
+								"query": "query findOneCustomerByPhoneNumber ($number: String!) {\n    findOneCustomerByPhoneNumber (number: $number) {\n            name\n            loanId\n            systemId\n            balanceRemaining\n            partnerId\n            id\n            accountNumber   \n            instalments{\n                id\n                daysLate\n                customerId\n                loanId\n                loanInstalmentId\n                totalAmountToRepay\n                repaid\n                amountCollected\n                amountPreviouslyPaidByCustomer\n                dueDate\n                campaign\n                completed\n                customerDiscount\n                selfPayment\n            }\n            plan\n            {\n                id\n                planMonthly\n               }\n        }\n        \n    }\n\n      \n              \n",
 								"variables": "{\n  \"number\": \"9032651880\"\n}"
 							}
 						},
@@ -138,6 +198,676 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "findOneCustomerByPhoneNumber",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = pm.response.json();",
+									"const loandId  = \"2073000\"",
+									"const partnerId = \"89e47c63-406f-46a6-8f4f-82af8eb963cf\"",
+									"const name = \"Olajide Test\"",
+									"const baalance = 20590",
+									"",
+									"",
+									"pm.test(\"Body contains Loan Id \", function () {",
+									"    pm.expect(jsonData.data.findOneCustomerByPhoneNumber.loanId).to.eql(loandId);",
+									"});",
+									"",
+									"pm.test(\"Body contains partner Id \", function () {",
+									"    pm.expect(jsonData.data.findOneCustomerByPhoneNumber.partnerId).to.eql(partnerId);",
+									"});",
+									"",
+									"pm.test(\"Body contains customer name \", function () {",
+									"    pm.expect(jsonData.data.findOneCustomerByPhoneNumber.name).to.eql(name);",
+									"});",
+									"",
+									"pm.test(\"Body contains customer balance \", function () {",
+									"    pm.expect(jsonData.data.findOneCustomerByPhoneNumber.balanceRemaining).to.eql(baalance);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{customer-token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query findOneCustomerByPhoneNumber ($number: String!) {\n    findOneCustomerByPhoneNumber (number: $number) {\n        id\n        partnerId\n        agentId\n        userId\n        loanId\n        systemId\n        name\n        address\n        lga\n        city\n        state\n        accountNumber\n        bankName\n        telephone\n        userTelephone\n        bvnNumber\n        bvnTelephone\n        guarantorName\n        guarantorAddress\n        guarantorTelephone\n        guarantorRelationship\n        createdAt\n        updatedAt\n        assignedAt\n        weight\n        risk\n        classification\n        dnd\n        dndAt\n        tags\n        partner {\n            id\n            userId\n            name\n            description\n            website\n            logoUrl\n            accountNumber\n            accountName\n            bankName\n            active\n            settings\n            createdAt\n            updatedAt\n        }\n        agent {\n            id\n            userId\n            designation\n            commission\n            settlementBankName\n            settlementBankAccountNumber\n            settlementBankAccountName\n            kind\n            active\n            updatedAt\n            staffId\n            updatedBy\n            partnerIds\n            extensionNumber\n            performance {\n                totalEarnings\n                totalCollections\n                totalUnpaidCommissions\n                totalUnpaidCommissionsFrom\n                totalUnpaidCommissionsTo\n            }\n            collection {\n                id\n                agentId\n                reportId\n                commission\n                commissionAmount\n                amount\n                description\n                balanceBefore\n                balanceAfter\n                paidAfter\n                settled\n                createdAt\n                agent {\n                    id\n                    userId\n                    designation\n                    commission\n                    settlementBankName\n                    settlementBankAccountNumber\n                    settlementBankAccountName\n                    kind\n                    active\n                    updatedAt\n                    staffId\n                    updatedBy\n                    partnerIds\n                    extensionNumber\n                }\n                customer {\n                    id\n                    partnerId\n                    agentId\n                    userId\n                    loanId\n                    systemId\n                    name\n                    address\n                    lga\n                    city\n                    state\n                    accountNumber\n                    bankName\n                    telephone\n                    userTelephone\n                    bvnNumber\n                    bvnTelephone\n                    guarantorName\n                    guarantorAddress\n                    guarantorTelephone\n                    guarantorRelationship\n                    createdAt\n                    updatedAt\n                    assignedAt\n                    weight\n                    risk\n                    classification\n                    dnd\n                    dndAt\n                    tags\n                    partner {\n                        id\n                        userId\n                        name\n                        description\n                        website\n                        logoUrl\n                        accountNumber\n                        accountName\n                        bankName\n                        active\n                        settings\n                        createdAt\n                        updatedAt\n                    }\n                    agent {\n                        id\n                        userId\n                        designation\n                        commission\n                        settlementBankName\n                        settlementBankAccountNumber\n                        settlementBankAccountName\n                        kind\n                        active\n                        updatedAt\n                        staffId\n                        updatedBy\n                        partnerIds\n                        extensionNumber\n                    }\n                    gender\n                    email\n                    dob\n                    registeredTelephoneNumber\n                    otpPinId\n                    lastLoggedIn\n                    balanceRemaining\n                    plan {\n                        id\n                        planDaily\n                        planWeekly\n                        planMonthly\n                        planYearly\n                        note\n                        createdAt\n                        updatedAt\n                    }\n                    instalments {\n                        id\n                        customerId\n                        loanId\n                        loanInstalmentId\n                        totalAmountToRepay\n                        totalAmountAutoDebit\n                        selfPayment\n                        paidAfter\n                        repaid\n                        createdAt\n                        campaign\n                        dueDate\n                        disbursementDate\n                        originalAmountToPay\n                        originalPrincipalToPay\n                        originalInterestToPay\n                        originalLateFees\n                        amountToPayIncludingFees\n                        customerDiscount\n                        numberOfInstalments\n                        daysLate\n                        enteredAt\n                        updatedAt\n                        deletedAt\n                        completed\n                        amountCollected\n                        amountPreviouslyPaidByCustomer\n                    }\n                    reports {\n                        id\n                        agentId\n                        staffId\n                        type\n                        comment\n                        meta\n                        createdAt\n                        updatedAt\n                        submitterKind\n                    }\n                    collections {\n                        id\n                        agentId\n                        reportId\n                        commission\n                        commissionAmount\n                        amount\n                        description\n                        balanceBefore\n                        balanceAfter\n                        paidAfter\n                        settled\n                        createdAt\n                    }\n                    channel\n                    alternateNumber\n                    maritalStatus\n                    stateOfOrigin\n                    lgaOfOrigin\n                    nextOfKinName\n                    nextOfKinAddress\n                    nextOfKinTelephone\n                    employmentStatus\n                    businessName\n                    businessAddress\n                    monthlyNetIncome\n                    annualNetIncome\n                    customerBankName\n                    customerAccountName\n                    customerAccountNumber\n                    meansOfIdentification\n                    utilityBill\n                }\n            }\n        }\n        gender\n        email\n        dob\n        registeredTelephoneNumber\n        otpPinId\n        lastLoggedIn\n        balanceRemaining\n        plan {\n            id\n            planDaily\n            planWeekly\n            planMonthly\n            planYearly\n            note\n            createdAt\n            updatedAt\n        }\n        instalments {\n            id\n            customerId\n            loanId\n            loanInstalmentId\n            totalAmountToRepay\n            totalAmountAutoDebit\n            selfPayment\n            paidAfter\n            repaid\n            createdAt\n            campaign\n            dueDate\n            disbursementDate\n            originalAmountToPay\n            originalPrincipalToPay\n            originalInterestToPay\n            originalLateFees\n            amountToPayIncludingFees\n            customerDiscount\n            numberOfInstalments\n            daysLate\n            enteredAt\n            updatedAt\n            deletedAt\n            completed\n            amountCollected\n            amountPreviouslyPaidByCustomer\n        }\n        reports {\n            id\n            agentId\n            staffId\n            type\n            comment\n            meta\n            createdAt\n            updatedAt\n            customerPtps {\n                id\n                partnerId\n                customerId\n                agentId\n                customerReportId\n                loanId\n                amount\n                amountPaid\n                ptpDate\n                isMultiple\n                actualPaymentDate\n                paymentStatus\n                submittedBy\n                updatedBy\n                submitterKind\n                updaterKind\n                attachments\n                createdAt\n                updatedAt\n                deletedAt\n            }\n            submitterKind\n        }\n        collections {\n            id\n            agentId\n            reportId\n            commission\n            commissionAmount\n            amount\n            description\n            balanceBefore\n            balanceAfter\n            paidAfter\n            settled\n            createdAt\n            agent {\n                id\n                userId\n                designation\n                commission\n                settlementBankName\n                settlementBankAccountNumber\n                settlementBankAccountName\n                kind\n                active\n                updatedAt\n                staffId\n                updatedBy\n                partnerIds\n                extensionNumber\n            }\n            customer {\n                id\n                partnerId\n                agentId\n                userId\n                loanId\n                systemId\n                name\n                address\n                lga\n                city\n                state\n                accountNumber\n                bankName\n                telephone\n                userTelephone\n                bvnNumber\n                bvnTelephone\n                guarantorName\n                guarantorAddress\n                guarantorTelephone\n                guarantorRelationship\n                createdAt\n                updatedAt\n                assignedAt\n                weight\n                risk\n                classification\n                dnd\n                dndAt\n                tags\n                gender\n                email\n                dob\n                registeredTelephoneNumber\n                otpPinId\n                lastLoggedIn\n                balanceRemaining\n                channel\n                alternateNumber\n                maritalStatus\n                stateOfOrigin\n                lgaOfOrigin\n                nextOfKinName\n                nextOfKinAddress\n                nextOfKinTelephone\n                employmentStatus\n                businessName\n                businessAddress\n                monthlyNetIncome\n                annualNetIncome\n                customerBankName\n                customerAccountName\n                customerAccountNumber\n                meansOfIdentification\n                utilityBill\n            }\n        }\n        channel\n        alternateNumber\n        maritalStatus\n        stateOfOrigin\n        lgaOfOrigin\n        nextOfKinName\n        nextOfKinAddress\n        nextOfKinTelephone\n        employmentStatus\n        businessName\n        businessAddress\n        monthlyNetIncome\n        annualNetIncome\n        customerBankName\n        customerAccountName\n        customerAccountNumber\n        meansOfIdentification\n        utilityBill\n    }\n}",
+								"variables": "{\n  \"number\": \"9032651880\"\n}"
+							}
+						},
+						"url": {
+							"raw": "{{url }}",
+							"host": [
+								"{{url }}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "crm",
+			"item": [
+				{
+					"name": "agent",
+					"item": [
+						{
+							"name": "Login as an agent with incorrect password",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"  const jsonData = pm.response.json();",
+											"",
+											"pm.test(\"Body contains string\", function () {",
+											"    pm.expect(jsonData.errors[0].message).to.eql(\"incorrect email or password\");",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query authenticate($email: String!, $password: String!) {\n  authenticate(email:$email, password:$password){\n    token\n    refresh\n    user{\n        id\n        name\n        kind\n        email\n    }\n    refreshTokenExpiry\n    \n  }\n}",
+										"variables": "{\n    \"email\" : \"agent.test@gmial.com\",\n    \"password\" : \"55555\"\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Login as an agent",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const kind = \"Agent\"",
+											"const email = \"agent.test@gmial.com\"",
+											"const name = \"agent101\"",
+											"const id = \"4c1be7b6-c937-448d-b173-56e11d60aabb\"",
+											"  const jsonData = pm.response.json();",
+											"",
+											"//Set access token as environment variable",
+											"var body = JSON.parse(responseBody);",
+											"pm.environment.set(\"Agent-token\", body.data.authenticate.token);",
+											"",
+											"pm.test(\"Content-Type is present\", function () {",
+											"    pm.response.to.have.header(\"Content-Type\");",
+											"});",
+											"",
+											"",
+											"pm.test(\"Body contains Id\", function () {",
+											"    pm.expect(jsonData.data.authenticate.user.id).to.eql(id);",
+											"});",
+											"",
+											"",
+											"pm.test(\"Body contains name\", function () {",
+											"    pm.expect(jsonData.data.authenticate.user.name).to.eql(name);",
+											"});",
+											"",
+											"",
+											"pm.test(\"Body contains kind\", function () {",
+											"    pm.expect(jsonData.data.authenticate.user.kind).to.eql(kind);",
+											"});",
+											"",
+											"",
+											"pm.test(\"Body contains Email\", function () {",
+											"    pm.expect(jsonData.data.authenticate.user.email).to.eql(email);",
+											"});",
+											"",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query authenticate($email: String!, $password: String!) {\n  authenticate(email:$email, password:$password){\n    token\n    refresh\n    user{\n        id\n        name\n        kind\n        email\n    }\n    refreshTokenExpiry\n    \n  }\n}",
+										"variables": "{\n    \"email\" : \"agent.test@gmial.com\",\n    \"password\" : \"555555\"\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "searchPartner",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"  const jsonData = pm.response.json();",
+											"",
+											"pm.test(\"Body contains string\", function () {",
+											"    pm.expect(jsonData.data.searchPartner.pageInfo.totalCount).to.eql(4);",
+											"});",
+											"",
+											"pm.test(\"Body matches string\", function () {",
+											"    pm.expect(pm.response.text()).to.include(\"Borome\");",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{Agent-token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query searchPartner ($page: Page!, $keyword: String) {\n    searchPartner (page: $page, keyword: $keyword) {\n        items {\n            id\n            userId\n            name\n            description\n            website\n            logoUrl\n            accountNumber\n            accountName\n            bankName\n            active\n            settings\n            createdAt\n            updatedAt\n        }\n        pageInfo {\n            page\n            size\n            hasNextPage\n            hasPreviousPage\n            totalCount\n        }\n    }\n}",
+										"variables": "{\n  \"page\": {\n    \"number\": 1,\n    \"size\": 10,\n    \"sortBy\": \"id\",\n    \"sortDirectionDesc\": true\n  },\n  \"keyword\": \"\"\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "findOneCustomer",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const jsonData = pm.response.json();",
+											"const loandId  = \"20993648\"",
+											"const partnerId = \"89e47c63-406f-46a6-8f4f-82af8eb963cf\"",
+											"const name = \"Anas Musa Habib\"",
+											"",
+											"pm.test(\"Body contains Loan Id \", function () {",
+											"    pm.expect(jsonData.data.findOneCustomer.loanId).to.eql(loandId);",
+											"});",
+											"",
+											"pm.test(\"Body contains partner Id \", function () {",
+											"    pm.expect(jsonData.data.findOneCustomer.partnerId).to.eql(partnerId);",
+											"});",
+											"",
+											"pm.test(\"Body contains customer name \", function () {",
+											"    pm.expect(jsonData.data.findOneCustomer.name).to.eql(name);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{Agent-token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query findOneCustomer ($id: String!) {\n    findOneCustomer (id: $id) {\n        id\n        partnerId\n        agentId\n        userId\n        loanId\n        systemId\n        name\n        address\n        lga\n        city\n        state\n        accountNumber\n        bankName\n        telephone\n        userTelephone\n        bvnNumber\n        bvnTelephone\n        guarantorName\n        guarantorTelephone\n        guarantorRelationship\n        createdAt\n        updatedAt\n        assignedAt\n        weight\n        risk\n        classification\n        dnd\n        dndAt\n        tags\n        partner {\n            id\n            userId\n            name\n            description\n            website\n            logoUrl\n            accountNumber\n            accountName\n            bankName\n            active\n            settings\n            createdAt\n            updatedAt\n        }\n        agent {\n            id\n            userId\n            designation\n            commission\n            settlementBankName\n            settlementBankAccountNumber\n            settlementBankAccountName\n            kind\n            active\n            updatedAt\n            staffId\n            updatedBy\n            partnerIds\n            extensionNumber\n            performance {\n                totalEarnings\n                totalCollections\n                totalUnpaidCommissions\n                totalUnpaidCommissionsFrom\n                totalUnpaidCommissionsTo\n            }\n            collection {\n                id\n                agentId\n                reportId\n                commission\n                commissionAmount\n                amount\n                description\n                balanceBefore\n                balanceAfter\n                paidAfter\n                settled\n                createdAt\n                agent {\n                    id\n                    userId\n                    designation\n                    commission\n                    settlementBankName\n                    settlementBankAccountNumber\n                    settlementBankAccountName\n                    kind\n                    active\n                    updatedAt\n                    staffId\n                    updatedBy\n                    partnerIds\n                    extensionNumber\n                }\n                customer {\n                    id\n                    partnerId\n                    agentId\n                    userId\n                    loanId\n                    systemId\n                    name\n                    address\n                    lga\n                    city\n                    state\n                    accountNumber\n                    bankName\n                    telephone\n                    userTelephone\n                    bvnNumber\n                    bvnTelephone\n                    guarantorName\n                    guarantorTelephone\n                    guarantorRelationship\n                    createdAt\n                    updatedAt\n                    assignedAt\n                    weight\n                    risk\n                    classification\n                    dnd\n                    dndAt\n                    tags\n                    partner {\n                        id\n                        userId\n                        name\n                        description\n                        website\n                        logoUrl\n                        accountNumber\n                        accountName\n                        bankName\n                        active\n                        settings\n                        createdAt\n                        updatedAt\n                    }\n                    agent {\n                        id\n                        userId\n                        designation\n                        commission\n                        settlementBankName\n                        settlementBankAccountNumber\n                        settlementBankAccountName\n                        kind\n                        active\n                        updatedAt\n                        staffId\n                        updatedBy\n                        partnerIds\n                        extensionNumber\n                    }\n                    gender\n                    email\n                    dob\n                    registeredTelephoneNumber\n                    otpPinId\n                    lastLoggedIn\n                    balanceRemaining\n                    plan {\n                        id\n                        planDaily\n                        planWeekly\n                        planMonthly\n                        planYearly\n                        note\n                        createdAt\n                        updatedAt\n                    }\n                    instalments {\n                        id\n                        customerId\n                        loanId\n                        loanInstalmentId\n                        totalAmountToRepay\n                        totalAmountAutoDebit\n                        selfPayment\n                        paidAfter\n                        repaid\n                        createdAt\n                        campaign\n                        dueDate\n                        disbursementDate\n                        originalAmountToPay\n                        originalPrincipalToPay\n                        originalInterestToPay\n                        originalLateFees\n                        amountToPayIncludingFees\n                        customerDiscount\n                        numberOfInstalments\n                        daysLate\n                        enteredAt\n                        updatedAt\n                        deletedAt\n                        completed\n                        amountCollected\n                        amountPreviouslyPaidByCustomer\n                    }\n                    reports {\n                        id\n                        agentId\n                        staffId\n                        type\n                        comment\n                        meta\n                        createdAt\n                        updatedAt\n                    }\n                    collections {\n                        id\n                        agentId\n                        reportId\n                        commission\n                        commissionAmount\n                        amount\n                        description\n                        balanceBefore\n                        balanceAfter\n                        paidAfter\n                        settled\n                        createdAt\n                    }\n                    channel\n                }\n            }\n        }\n        gender\n        email\n        dob\n        registeredTelephoneNumber\n        otpPinId\n        lastLoggedIn\n        balanceRemaining\n        plan {\n            id\n            planDaily\n            planWeekly\n            planMonthly\n            planYearly\n            note\n            createdAt\n            updatedAt\n        }\n        instalments {\n            id\n            customerId\n            loanId\n            loanInstalmentId\n            totalAmountToRepay\n            totalAmountAutoDebit\n            selfPayment\n            paidAfter\n            repaid\n            createdAt\n            campaign\n            dueDate\n            disbursementDate\n            originalAmountToPay\n            originalPrincipalToPay\n            originalInterestToPay\n            originalLateFees\n            amountToPayIncludingFees\n            customerDiscount\n            numberOfInstalments\n            daysLate\n            enteredAt\n            updatedAt\n            deletedAt\n            completed\n            amountCollected\n            amountPreviouslyPaidByCustomer\n        }\n        reports {\n            id\n            agentId\n            staffId\n            type\n            comment\n            meta\n            createdAt\n            updatedAt\n            customerPtps {\n                id\n                partnerId\n                customerId\n                agentId\n                customerReportId\n                loanId\n                amount\n                ptpDate\n                isMultiple\n                actualPaymentDate\n                paymentStatus\n                submittedBy\n                updatedBy\n                submitterKind\n                updaterKind\n                attachments\n                createdAt\n                updatedAt\n                deletedAt\n            }\n        }\n        collections {\n            id\n            agentId\n            reportId\n            commission\n            commissionAmount\n            amount\n            description\n            balanceBefore\n            balanceAfter\n            paidAfter\n            settled\n            createdAt\n            agent {\n                id\n                userId\n                designation\n                commission\n                settlementBankName\n                settlementBankAccountNumber\n                settlementBankAccountName\n                kind\n                active\n                updatedAt\n                staffId\n                updatedBy\n                partnerIds\n                extensionNumber\n            }\n            customer {\n                id\n                partnerId\n                agentId\n                userId\n                loanId\n                systemId\n                name\n                address\n                lga\n                city\n                state\n                accountNumber\n                bankName\n                telephone\n                userTelephone\n                bvnNumber\n                bvnTelephone\n                guarantorName\n                guarantorTelephone\n                guarantorRelationship\n                createdAt\n                updatedAt\n                assignedAt\n                weight\n                risk\n                classification\n                dnd\n                dndAt\n                tags\n                gender\n                email\n                dob\n                registeredTelephoneNumber\n                otpPinId\n                lastLoggedIn\n                balanceRemaining\n                channel\n            }\n        }\n        channel\n    }\n}",
+										"variables": "{\n  \"id\": \"da1a5b2e-7556-463c-a433-3f277cd0344b\"\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "admin",
+					"item": [
+						{
+							"name": "Login as an admin",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"//Set access token as environment variable",
+											"const jsonData = pm.response.json();",
+											"const body = JSON.parse(responseBody);",
+											"pm.environment.set(\"Admin-token\", body.data.authenticate.token);",
+											"",
+											"const id = \"7e05faa1-8393-463f-8f53-89509b6f8230\"",
+											"const name = \"Segun\"",
+											"const kind = \"Administrator\"",
+											"const email = \"tech@bfree.africa\"",
+											"",
+											"pm.test(\"Body contains customer Id \", function () {",
+											"    pm.expect(jsonData.data.authenticate.user.id).to.eql(id);",
+											"});",
+											"",
+											"pm.test(\"Body contains name \", function () {",
+											"    pm.expect(jsonData.data.authenticate.user.name).to.eql(name);",
+											"});",
+											"",
+											"pm.test(\"Body contains kind \", function () {",
+											"    pm.expect(jsonData.data.authenticate.user.kind).to.eql(kind);",
+											"});",
+											"",
+											"pm.test(\"Body contains email \", function () {",
+											"    pm.expect(jsonData.data.authenticate.user.email).to.eql(email);",
+											"});",
+											"",
+											"",
+											"pm.test(\"Content-Type is present\", function () {",
+											"    pm.response.to.have.header(\"Content-Type\");",
+											"});",
+											"",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query authenticate($email: String!, $password: String!) {\n  authenticate(email:$email, password:$password){\n    token\n    refresh\n    user {\n        id\n        name\n        kind\n        state\n        email\n    }\n    accessTokenExpiry\n  }\n}",
+										"variables": "{\n    \"email\" : \"tech@bfree.africa\",\n    \"password\" : \"password\"\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Login as an admin with incorrect password",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"  const jsonData = pm.response.json();",
+											"",
+											"pm.test(\"Body contains string\", function () {",
+											"    pm.expect(jsonData.errors[0].message).to.eql(\"incorrect email or password\");",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query authenticate($email: String!, $password: String!) {\n  authenticate(email:$email, password:$password){\n    token\n    refresh\n    user {\n        id\n        name\n        kind\n        state\n        email\n    }\n    accessTokenExpiry\n  }\n}",
+										"variables": "{\n    \"email\" : \"tech@bfree.africa\",\n    \"password\" : \"passwor\"\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "searchPartner",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"  const jsonData = pm.response.json();",
+											"",
+											"pm.test(\"Body contains string\", function () {",
+											"    pm.expect(jsonData.data.searchPartner.pageInfo.totalCount).to.eql(4);",
+											"});",
+											"",
+											"pm.test(\"Body matches string\", function () {",
+											"    pm.expect(pm.response.text()).to.include(\"Borome\");",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{Admin-token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query searchPartner ($page: Page!, $keyword: String) {\n    searchPartner (page: $page, keyword: $keyword) {\n        items {\n            id\n            userId\n            name\n            description\n            website\n            logoUrl\n            accountNumber\n            accountName\n            bankName\n            active\n            settings\n            createdAt\n            updatedAt\n        }\n        pageInfo {\n            page\n            size\n            hasNextPage\n            hasPreviousPage\n            totalCount\n        }\n    }\n}",
+										"variables": "{\n  \"page\": {\n    \"number\": 1,\n    \"size\": 10,\n    \"sortBy\": \"id\",\n    \"sortDirectionDesc\": true\n  },\n  \"keyword\": \"\"\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "findOneCustomer",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const jsonData = pm.response.json();",
+											"const loandId  = \"20993648\"",
+											"const partnerId = \"89e47c63-406f-46a6-8f4f-82af8eb963cf\"",
+											"const name = \"Anas Musa Habib\"",
+											"",
+											"pm.test(\"Body contains Loan Id \", function () {",
+											"    pm.expect(jsonData.data.findOneCustomer.loanId).to.eql(loandId);",
+											"});",
+											"",
+											"pm.test(\"Body contains partner Id \", function () {",
+											"    pm.expect(jsonData.data.findOneCustomer.partnerId).to.eql(partnerId);",
+											"});",
+											"",
+											"pm.test(\"Body contains customer name \", function () {",
+											"    pm.expect(jsonData.data.findOneCustomer.name).to.eql(name);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{Admin-token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query findOneCustomer ($id: String!) {\n    findOneCustomer (id: $id) {\n        id\n        partnerId\n        agentId\n        userId\n        loanId\n        systemId\n        name\n        address\n        lga\n        city\n        state\n        accountNumber\n        bankName\n        telephone\n        userTelephone\n        bvnNumber\n        bvnTelephone\n        guarantorName\n        guarantorTelephone\n        guarantorRelationship\n        createdAt\n        updatedAt\n        assignedAt\n        weight\n        risk\n        classification\n        dnd\n        dndAt\n        tags\n        partner {\n            id\n            userId\n            name\n            description\n            website\n            logoUrl\n            accountNumber\n            accountName\n            bankName\n            active\n            settings\n            createdAt\n            updatedAt\n        }\n        agent {\n            id\n            userId\n            designation\n            commission\n            settlementBankName\n            settlementBankAccountNumber\n            settlementBankAccountName\n            kind\n            active\n            updatedAt\n            staffId\n            updatedBy\n            partnerIds\n            extensionNumber\n            performance {\n                totalEarnings\n                totalCollections\n                totalUnpaidCommissions\n                totalUnpaidCommissionsFrom\n                totalUnpaidCommissionsTo\n            }\n            collection {\n                id\n                agentId\n                reportId\n                commission\n                commissionAmount\n                amount\n                description\n                balanceBefore\n                balanceAfter\n                paidAfter\n                settled\n                createdAt\n                agent {\n                    id\n                    userId\n                    designation\n                    commission\n                    settlementBankName\n                    settlementBankAccountNumber\n                    settlementBankAccountName\n                    kind\n                    active\n                    updatedAt\n                    staffId\n                    updatedBy\n                    partnerIds\n                    extensionNumber\n                }\n                customer {\n                    id\n                    partnerId\n                    agentId\n                    userId\n                    loanId\n                    systemId\n                    name\n                    address\n                    lga\n                    city\n                    state\n                    accountNumber\n                    bankName\n                    telephone\n                    userTelephone\n                    bvnNumber\n                    bvnTelephone\n                    guarantorName\n                    guarantorTelephone\n                    guarantorRelationship\n                    createdAt\n                    updatedAt\n                    assignedAt\n                    weight\n                    risk\n                    classification\n                    dnd\n                    dndAt\n                    tags\n                    partner {\n                        id\n                        userId\n                        name\n                        description\n                        website\n                        logoUrl\n                        accountNumber\n                        accountName\n                        bankName\n                        active\n                        settings\n                        createdAt\n                        updatedAt\n                    }\n                    agent {\n                        id\n                        userId\n                        designation\n                        commission\n                        settlementBankName\n                        settlementBankAccountNumber\n                        settlementBankAccountName\n                        kind\n                        active\n                        updatedAt\n                        staffId\n                        updatedBy\n                        partnerIds\n                        extensionNumber\n                    }\n                    gender\n                    email\n                    dob\n                    registeredTelephoneNumber\n                    otpPinId\n                    lastLoggedIn\n                    balanceRemaining\n                    plan {\n                        id\n                        planDaily\n                        planWeekly\n                        planMonthly\n                        planYearly\n                        note\n                        createdAt\n                        updatedAt\n                    }\n                    instalments {\n                        id\n                        customerId\n                        loanId\n                        loanInstalmentId\n                        totalAmountToRepay\n                        totalAmountAutoDebit\n                        selfPayment\n                        paidAfter\n                        repaid\n                        createdAt\n                        campaign\n                        dueDate\n                        disbursementDate\n                        originalAmountToPay\n                        originalPrincipalToPay\n                        originalInterestToPay\n                        originalLateFees\n                        amountToPayIncludingFees\n                        customerDiscount\n                        numberOfInstalments\n                        daysLate\n                        enteredAt\n                        updatedAt\n                        deletedAt\n                        completed\n                        amountCollected\n                        amountPreviouslyPaidByCustomer\n                    }\n                    reports {\n                        id\n                        agentId\n                        staffId\n                        type\n                        comment\n                        meta\n                        createdAt\n                        updatedAt\n                    }\n                    collections {\n                        id\n                        agentId\n                        reportId\n                        commission\n                        commissionAmount\n                        amount\n                        description\n                        balanceBefore\n                        balanceAfter\n                        paidAfter\n                        settled\n                        createdAt\n                    }\n                    channel\n                }\n            }\n        }\n        gender\n        email\n        dob\n        registeredTelephoneNumber\n        otpPinId\n        lastLoggedIn\n        balanceRemaining\n        plan {\n            id\n            planDaily\n            planWeekly\n            planMonthly\n            planYearly\n            note\n            createdAt\n            updatedAt\n        }\n        instalments {\n            id\n            customerId\n            loanId\n            loanInstalmentId\n            totalAmountToRepay\n            totalAmountAutoDebit\n            selfPayment\n            paidAfter\n            repaid\n            createdAt\n            campaign\n            dueDate\n            disbursementDate\n            originalAmountToPay\n            originalPrincipalToPay\n            originalInterestToPay\n            originalLateFees\n            amountToPayIncludingFees\n            customerDiscount\n            numberOfInstalments\n            daysLate\n            enteredAt\n            updatedAt\n            deletedAt\n            completed\n            amountCollected\n            amountPreviouslyPaidByCustomer\n        }\n        reports {\n            id\n            agentId\n            staffId\n            type\n            comment\n            meta\n            createdAt\n            updatedAt\n            customerPtps {\n                id\n                partnerId\n                customerId\n                agentId\n                customerReportId\n                loanId\n                amount\n                ptpDate\n                isMultiple\n                actualPaymentDate\n                paymentStatus\n                submittedBy\n                updatedBy\n                submitterKind\n                updaterKind\n                attachments\n                createdAt\n                updatedAt\n                deletedAt\n            }\n        }\n        collections {\n            id\n            agentId\n            reportId\n            commission\n            commissionAmount\n            amount\n            description\n            balanceBefore\n            balanceAfter\n            paidAfter\n            settled\n            createdAt\n            agent {\n                id\n                userId\n                designation\n                commission\n                settlementBankName\n                settlementBankAccountNumber\n                settlementBankAccountName\n                kind\n                active\n                updatedAt\n                staffId\n                updatedBy\n                partnerIds\n                extensionNumber\n            }\n            customer {\n                id\n                partnerId\n                agentId\n                userId\n                loanId\n                systemId\n                name\n                address\n                lga\n                city\n                state\n                accountNumber\n                bankName\n                telephone\n                userTelephone\n                bvnNumber\n                bvnTelephone\n                guarantorName\n                guarantorTelephone\n                guarantorRelationship\n                createdAt\n                updatedAt\n                assignedAt\n                weight\n                risk\n                classification\n                dnd\n                dndAt\n                tags\n                gender\n                email\n                dob\n                registeredTelephoneNumber\n                otpPinId\n                lastLoggedIn\n                balanceRemaining\n                channel\n            }\n        }\n        channel\n    }\n}",
+										"variables": "{\n  \"id\": \"da1a5b2e-7556-463c-a433-3f277cd0344b\"\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "reAssignAgentToCustomer",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const jsonData = pm.response.json();",
+											"",
+											"pm.test(\"Agent has been reassigned \", function () {",
+											"    pm.expect(jsonData.data.reAssignAgentToCustomer).to.eql(true);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{Admin-token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "mutation reAssignAgentToCustomer ($customerId: String!, $agentId: String!) {\n    reAssignAgentToCustomer (customerId: $customerId, agentId: $agentId)\n}",
+										"variables": "{\n  \"customerId\": \"f615fd6c-46f4-4f6d-b951-8ead9433cf1e\",\n  \"agentId\": \"dd4308e1-c0cd-4ee4-a34e-60a0011cecf8\"\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "searchPartner",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"var body = JSON.parse(responseBody);",
+											"tests[\"Body returns\" + \"   \" + body.data.searchPartner.items.length + \"   \" + \"Partners\"] = true"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{Admin-token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query searchPartner ($page: Page!, $keyword: String) {\n    searchPartner (page: $page, keyword: $keyword) {\n        items {\n            id\n            userId\n            name\n            description\n            website\n            logoUrl\n            accountNumber\n            accountName\n            bankName\n            active\n            settings\n            createdAt\n            updatedAt\n        }\n        pageInfo {\n            page\n            size\n            hasNextPage\n            hasPreviousPage\n            totalCount\n        }\n    }\n}",
+										"variables": "{\n  \"page\": {\n    \"number\": 1,\n    \"size\": 10,\n    \"sortBy\": \"name\",\n    \"sortDirectionDesc\": true\n  },\n  \"keyword\": \"\"\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "findOnePartner",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const jsonData = pm.response.json();",
+											"const id = 'f7c46026-7c50-4d99-932e-91ca8c3fbb84'",
+											"const partner_name = 'Borome'",
+											"",
+											"",
+											"pm.test(\"Body contains Partner Id \", function () {",
+											"    pm.expect(jsonData.data.findOnePartner.id).to.eql(id);",
+											"});",
+											"",
+											"pm.test(\"Body contains Partner Name \", function () {",
+											"    pm.expect(jsonData.data.findOnePartner.name).to.eql(partner_name);",
+											"});",
+											"",
+											"pm.test(\"Partner is active \", function () {",
+											"    pm.expect(jsonData.data.findOnePartner.active).to.eql(true);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{Admin-token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query findOnePartner ($id: String!) {\n    findOnePartner (id: $id) {\n        id\n        userId\n        name\n        description\n        website\n        logoUrl\n        accountNumber\n        accountName\n        bankName\n        active\n        settings\n        createdAt\n        updatedAt\n    }\n}",
+										"variables": "{\n  \"id\": \"f7c46026-7c50-4d99-932e-91ca8c3fbb84\"\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
 				}
 			]
 		}
