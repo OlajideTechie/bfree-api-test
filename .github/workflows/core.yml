@@ -3,6 +3,10 @@ on:
   push:
     branches:
     - master
+  pull_request:
+    branches:
+    - Olajide-br
+    
 jobs:
   test-api:
     runs-on: ubuntu-latest
