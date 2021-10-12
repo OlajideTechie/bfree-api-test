@@ -36,7 +36,7 @@ jobs:
       run: |
        newman run bfree-core.json -e core-environment.json
        
-    - name: Generate HTML Report
+    - name: Generate Report
       run: |
        newman run bfree-core.json -e core-environment.json -r htmlextra --reporter-htmlextra-export testResults/core-api-testReport.html --reporter-htmlextra-darkTheme
        
