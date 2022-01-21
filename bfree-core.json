@@ -1,7 +1,7 @@
 {
 	"info": {
-		"_postman_id": "554fb2db-f19d-418d-89e5-aa0cf0a4dccd",
-		"name": "BEFREE-API-CORE",
+		"_postman_id": "22d51c9e-8f10-4f96-87ac-e8e38f713baa",
+		"name": "Bfree-Core(staging)",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -9,7 +9,46 @@
 			"name": "selfservice",
 			"item": [
 				{
-					"name": "Login as a customer",
+					"name": "Login as a customer with incorrect pin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const errorMessage = 'incorrect login details'",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"User must enter correct loagin details \", function () {",
+									"    pm.expect(jsonData.errors[0].message).to.eql(errorMessage);",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query authenticateCustomer ($id: String!, $pin: String!) {\n    authenticateCustomer (id: $id, pin: $pin) {\n        token\n        refresh\n        refreshTokenExpiry\n        customer{\n            id\n            name\n            loanId\n          accountNumber\n          bankName\n          systemId\n          risk\n             agentId\n             userId\n             systemId\n             channel \n             balanceRemaining\n             registeredTelephoneNumber\n             lastLoggedIn\n             guarantorName\n             guarantorTelephone\n             lga\n             state\n             partner{\n                 name\n             }\n             \n        } \n         \n        accessTokenExpiry\n  }\n\n}",
+								"variables": "{\n  \"id\": \"8b785c57-3f94-404c-b549-0cbe1c566f35\",\n  \"pin\": \"0001\"\n}"
+							}
+						},
+						"url": {
+							"raw": "{{url }}",
+							"host": [
+								"{{url }}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login as a valid customer",
 					"event": [
 						{
 							"listen": "test",
@@ -18,11 +57,16 @@
 									"//Set access token as environment variable",
 									"const body = JSON.parse(responseBody);",
 									"const jsonData = pm.response.json();",
-									"const agentId = '724123d0-dd4b-4cf0-8bae-9b50e52fef83'",
+									"const partner_name = 'Renmoney'",
+									"const phone_number ='9032651887'",
+									"const customer_name = 'Jude '",
+									"const customer_id = '2bddbdc6-dd9d-4378-b90e-893907ef2c71'",
+									"const loan = \"2348062411648\"",
+									"const customer_channel = \"call_bot\"",
+									"const customer_balance = 120157.6825",
+									"",
 									"pm.environment.set(\"customer-token\", body.data.authenticateCustomer.token);",
 									"pm.environment.set(\"customer=refresh-token\", body.data.authenticateCustomer.refresh);",
-									"",
-									"tests [\"Status Code is 200\"] = responseCode.code === 201;",
 									"",
 									"//second test case",
 									"",
@@ -31,19 +75,39 @@
 									"});",
 									"",
 									"pm.test(\"Body contains customer Id \", function () {",
-									"    pm.expect(jsonData.data.authenticateCustomer.customer.id).to.eql(\"8b785c57-3f94-404c-b549-0cbe1c566f35\");",
+									"    pm.expect(jsonData.data.authenticateCustomer.customer.id).to.eql(customer_id);",
 									"});",
 									"",
-									"pm.test(\"Body contains agent Id \", function () {",
-									"    pm.expect(jsonData.data.authenticateCustomer.customer.agentId).to.eql(agentId);",
-									"});",
 									"",
 									"pm.test(\"Body contains customer name \", function () {",
-									"    pm.expect(jsonData.data.authenticateCustomer.customer.name).to.eql(\"Olajide - BFRE\");",
+									"    pm.expect(jsonData.data.authenticateCustomer.customer.name).to.eql(customer_name);",
 									"});",
 									"",
 									"pm.test(\"Body contains token\", function () {",
 									"    pm.expect(pm.response.text()).to.include(\"token\");",
+									"});",
+									"",
+									"",
+									"pm.test(\"Body contains partner name \", function () {",
+									"    pm.expect(jsonData.data.authenticateCustomer.customer.partner.name).to.eql(partner_name);",
+									"});",
+									"",
+									"pm.test(\"Body contains phonenumber \", function () {",
+									"    pm.expect(jsonData.data.authenticateCustomer.customer.registeredTelephoneNumber).to.eql(phone_number);",
+									"});",
+									"",
+									"pm.test(\"Body contains loan_id \", function () {",
+									"    pm.expect(jsonData.data.authenticateCustomer.customer.loanId).to.eql(loan);",
+									"});",
+									"",
+									"pm.test(\"Body contains customer channel \", function () {",
+									"    pm.expect(jsonData.data.authenticateCustomer.customer.channel).to.eql(customer_channel);",
+									"});",
+									"",
+									"pm.test(\"Customer has an outstanding balance to pay\", function () {",
+									"    pm.expect(jsonData.data.authenticateCustomer.customer.balanceRemaining).to.eql(customer_balance)",
+									"",
+									"",
 									"});",
 									""
 								],
@@ -57,8 +121,8 @@
 						"body": {
 							"mode": "graphql",
 							"graphql": {
-								"query": "query authenticateCustomer ($id: String!, $pin: String!) {\n    authenticateCustomer (id: $id, pin: $pin) {\n        token\n        refresh\n        refreshTokenExpiry\n        customer{\n            id\n            name\n            loanId\n             agentId\n             channel \n        } \n         \n        accessTokenExpiry\n  }\n\n}",
-								"variables": "{\n  \"id\": \"8b785c57-3f94-404c-b549-0cbe1c566f35\",\n  \"pin\": \"0707\"\n}"
+								"query": "query authenticateCustomer ($id: String!, $pin: String!) {\n    authenticateCustomer (id: $id, pin: $pin) {\n        token\n        refresh\n        refreshTokenExpiry\n        customer{\n            id\n            name\n            loanId\n          accountNumber\n          bankName\n             userId\n             channel \n             balanceRemaining\n             registeredTelephoneNumber\n             lastLoggedIn\n             partner{\n                 name\n             }\n             \n        } \n         \n        accessTokenExpiry\n  }\n\n}",
+								"variables": "{\n  \"id\": \"2bddbdc6-dd9d-4378-b90e-893907ef2c71\",\n  \"pin\": \"0707\"\n}"
 							}
 						},
 						"url": {
@@ -78,30 +142,35 @@
 							"script": {
 								"exec": [
 									"const jsonData = pm.response.json();",
-									"const partnerId = '89e47c63-406f-46a6-8f4f-82af8eb963cf'",
-									"const customer_name = \"Olajide - BFREE\"",
-									"const loan_id = \"2073000\"",
-									"const loan_balance = 50590",
-									"const account_Number = \"9920231071\"",
+									"const partnerId = 'ce913165-fb28-4a63-814e-1b2037e4e10a'",
+									"const customer_name = \"Jude \"",
+									"const loan_id = \"2348062411648\"",
+									"const loan_balance = 120157.6825",
+									"const account_Number = \"0120829621\"",
+									"const loan_installmentId = \"be4a8e14-c40a-4273-a13e-c9d8f0dfdb99\"",
 									"",
-									"pm.test(\"Bosy contains customer name \", function () {",
+									"pm.test(\"Body contains customer name \", function () {",
 									"    pm.expect(jsonData.data.findOneCustomerByPhoneNumber.name).to.eql(customer_name);",
 									"});",
 									"",
-									"pm.test(\"Bosy contains customer loan id \", function () {",
+									"pm.test(\"Body contains customer loan id \", function () {",
 									"    pm.expect(jsonData.data.findOneCustomerByPhoneNumber.loanId).to.eql(loan_id);",
 									"});",
 									"",
-									"pm.test(\"Bosy contains customer loan balance \", function () {",
+									"pm.test(\"Body contains customer loan balance \", function () {",
 									"    pm.expect(jsonData.data.findOneCustomerByPhoneNumber.balanceRemaining).to.eql(loan_balance);",
 									"});",
 									"",
-									"pm.test(\"Bosy contains customer partner id \", function () {",
+									"pm.test(\"Body contains customer partner id \", function () {",
 									"    pm.expect(jsonData.data.findOneCustomerByPhoneNumber.partnerId).to.eql(partnerId);",
 									"});",
 									"",
-									"pm.test(\"Bosy contains customer account number \", function () {",
+									"pm.test(\"Body contains customer account number \", function () {",
 									"    pm.expect(jsonData.data.findOneCustomerByPhoneNumber.accountNumber).to.eql(account_Number);",
+									"});",
+									"",
+									"pm.test(\"Body contains loan_installmentId \", function () {",
+									"    pm.expect(jsonData.data.findOneCustomerByPhoneNumber.instalments[0].id).to.eql(loan_installmentId);",
 									"});",
 									"",
 									""
@@ -126,8 +195,8 @@
 						"body": {
 							"mode": "graphql",
 							"graphql": {
-								"query": "query findOneCustomerByPhoneNumber ($number: String!) {\n    findOneCustomerByPhoneNumber (number: $number) {\n            name\n            loanId\n            balanceRemaining\n            partnerId\n            id\n            accountNumber   \n        }\n        \n    }\n\n      \n              \n",
-								"variables": "{\n  \"number\": \"9032651880\"\n}"
+								"query": "query findOneCustomerByPhoneNumber ($number: String!) {\n    findOneCustomerByPhoneNumber (number: $number) {\n            name\n            loanId\n            systemId\n            balanceRemaining\n            partnerId\n            id\n            accountNumber   \n            instalments{\n                id\n                daysLate\n                customerId\n                loanId\n                loanInstalmentId\n                totalAmountToRepay\n                repaid\n                amountCollected\n                amountPreviouslyPaidByCustomer\n                dueDate\n                campaign\n                completed\n                customerDiscount\n                selfPayment\n            }\n            plan\n            {\n                id\n                planMonthly\n               }\n        }\n        \n    }\n\n      \n              \n",
+								"variables": "{\n  \"number\": \"9032651887\"\n}"
 							}
 						},
 						"url": {
@@ -136,6 +205,2583 @@
 								"{{url }}"
 							]
 						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateCustomerPTPByID(monthly)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Body contains string\", function () {",
+									"pm.expect(jsonData.errors[0].message).to.eql(\"cannot reschedule monthly more than 1 time(s)\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{customer-token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation updateCustomerPTPByID ($id: String!, $input: CustomerPTPUpdateRequest!) {\n    updateCustomerPTPByID (id: $id, input: $input) {\n        id\n        partnerId\n        customerId\n        agentId\n        customerReportId\n        loanId\n        amount\n        amountPaid\n        ptpDate\n        frequency\n        isMultiple\n        actualPaymentDate\n        paymentStatus\n        submittedBy\n        updatedBy\n        submitterKind\n        updaterKind\n        description\n        rescheduleCount\n        createdAt\n        updatedAt\n        deletedAt\n    }\n}",
+								"variables": "{\n  \"id\": \"b6c1407c-9a08-45cb-9cfb-ac42689b077a\",\n  \"input\": {\n    \"ptpDate\": \"2022-12-31\",\n    \"description\": \"hello world\",\n    \"actualPaymentDate\": \"2021-08-30\"\n  }\n}"
+							}
+						},
+						"url": {
+							"raw": "{{url }}",
+							"host": [
+								"{{url }}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateCustomerPTPByID(weekly)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Body contains string\", function () {",
+									"pm.expect(jsonData.errors[0].message).to.eql(\"cannot reschedule weekly more than 2 time(s)\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{customer-token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation updateCustomerPTPByID ($id: String!, $input: CustomerPTPUpdateRequest!) {\n    updateCustomerPTPByID (id: $id, input: $input) {\n        id\n        partnerId\n        customerId\n        agentId\n        customerReportId\n        loanId\n        amount\n        amountPaid\n        ptpDate\n        frequency\n        isMultiple\n        actualPaymentDate\n        paymentStatus\n        submittedBy\n        updatedBy\n        submitterKind\n        updaterKind\n        description\n        rescheduleCount\n        createdAt\n        updatedAt\n        deletedAt\n    }\n}",
+								"variables": "{\n  \"id\": \"8d45e690-cdb6-4b37-aa06-e6e0836a245d\",\n  \"input\": {\n    \"ptpDate\": \"2022-12-31\",\n    \"description\": \"ptp test for weekly schedule\",\n    \"actualPaymentDate\": \"2021-15-10\"\n  }\n}"
+							}
+						},
+						"url": {
+							"raw": "{{url }}",
+							"host": [
+								"{{url }}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateCustomerPTPByID(daily)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Body contains string\", function () {",
+									"pm.expect(jsonData.errors[0].message).to.eql(\"cannot reschedule daily more than 2 time(s)\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{customer-token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation updateCustomerPTPByID ($id: String!, $input: CustomerPTPUpdateRequest!) {\n    updateCustomerPTPByID (id: $id, input: $input) {\n        id\n        partnerId\n        customerId\n        agentId\n        customerReportId\n        loanId\n        amount\n        amountPaid\n        ptpDate\n        frequency\n        isMultiple\n        actualPaymentDate\n        paymentStatus\n        submittedBy\n        updatedBy\n        submitterKind\n        updaterKind\n        description\n        rescheduleCount\n        createdAt\n        updatedAt\n        deletedAt\n    }\n}",
+								"variables": "{\n  \"id\": \"d14c308e-32f2-42e2-8df6-fbad7cba8d1b\",\n  \"input\": {\n    \"ptpDate\": \"2022-12-31\",\n     \"description\": \"ptp test for daily schedule\",\n    \"actualPaymentDate\": \"2021-08-12\"\n  }\n}"
+							}
+						},
+						"url": {
+							"raw": "{{url }}",
+							"host": [
+								"{{url }}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateCustomerPTPByID(bi_weekly)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Body contains string\", function () {",
+									"pm.expect(jsonData.errors[0].message).to.eql(\"cannot reschedule bi_weekly more than 2 time(s)\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{customer-token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation updateCustomerPTPByID ($id: String!, $input: CustomerPTPUpdateRequest!) {\n    updateCustomerPTPByID (id: $id, input: $input) {\n        id\n        partnerId\n        customerId\n        agentId\n        customerReportId\n        loanId\n        amount\n        amountPaid\n        ptpDate\n        frequency\n        isMultiple\n        actualPaymentDate\n        paymentStatus\n        submittedBy\n        updatedBy\n        submitterKind\n        updaterKind\n        description\n        rescheduleCount\n        createdAt\n        updatedAt\n        deletedAt\n    }\n}",
+								"variables": "{\n  \"id\": \"29a94ca5-1821-4202-9c1d-6d864627e4e3\",\n  \"input\": {\n    \"ptpDate\": \"2022-12-31\",\n    \"description\": \"hello world\",\n    \"actualPaymentDate\": \"2021-09-01\"\n  }\n}"
+							}
+						},
+						"url": {
+							"raw": "{{url }}",
+							"host": [
+								"{{url }}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "checkCustomerAuthStatus Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"customer is verified\", function () {",
+									"    pm.expect(jsonData.data.checkCustomerAuthStatus.hasSetPin).to.eql(true);",
+									"       pm.expect(jsonData.data.checkCustomerAuthStatus.customerExists).to.eql(true);",
+									"         pm.expect(jsonData.data.checkCustomerAuthStatus.customerId).to.eql(\"2bddbdc6-dd9d-4378-b90e-893907ef2c71\");",
+									"           pm.expect(jsonData.data.checkCustomerAuthStatus.hasVerifiedPhoneNumber).to.eql(true);   ",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query checkCustomerAuthStatus ($phoneNumber: String!) {\n    checkCustomerAuthStatus (phoneNumber: $phoneNumber) {\n        hasSetPin\n        customerExists\n        customerId\n        hasVerifiedPhoneNumber\n    }\n}",
+								"variables": "{\n  \"phoneNumber\": \"9032651887\"\n}"
+							}
+						},
+						"url": {
+							"raw": "{{url }}",
+							"host": [
+								"{{url }}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "crm",
+			"item": [
+				{
+					"name": "agent",
+					"item": [
+						{
+							"name": "Login as an agent with incorrect password",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"  const jsonData = pm.response.json();",
+											"",
+											"pm.test(\"Body contains string\", function () {",
+											"    pm.expect(jsonData.errors[0].message).to.eql(\"incorrect email or password\");",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query authenticate($email: String!, $password: String!) {\n  authenticate(email:$email, password:$password){\n    token\n    refresh\n    user{\n        id\n        name\n        kind\n        email\n    }\n    refreshTokenExpiry\n    \n  }\n}",
+										"variables": "{\n    \"email\" : \"agent.test@gmial.com\",\n    \"password\" : \"55555\"\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Login as an agent",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const kind = \"Agent\"",
+											"const email = \"agent.test@gmial.com\"",
+											"const name = \"agent101\"",
+											"const id = \"4c1be7b6-c937-448d-b173-56e11d60aabb\"",
+											"const jsonData = pm.response.json();",
+											"",
+											"//Set access token as environment variable",
+											"var body = JSON.parse(responseBody);",
+											"pm.environment.set(\"Agent-token\", body.data.authenticate.token);",
+											"",
+											"pm.test(\"Content-Type is present\", function () {",
+											"    pm.response.to.have.header(\"Content-Type\");",
+											"});",
+											"",
+											"pm.test(\"Body contains Id\", function () {",
+											"    pm.expect(jsonData.data.authenticate.user.id).to.eql(id);",
+											"});",
+											"",
+											"pm.test(\"Body contains name\", function () {",
+											"    pm.expect(jsonData.data.authenticate.user.name).to.eql(name);",
+											"});",
+											"",
+											"",
+											"pm.test(\"Body contains kind\", function () {",
+											"    pm.expect(jsonData.data.authenticate.user.kind).to.eql(kind);",
+											"});",
+											"",
+											"pm.test(\"Body contains Email\", function () {",
+											"    pm.expect(jsonData.data.authenticate.user.email).to.eql(email);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query login ($email: String!, $password: String!){\n  authenticate (email: $email, password:$password){\n    token\n    refresh\n    accessTokenExpiry\n    refreshTokenExpiry\n    user{\n      id\n      name\n      kind\n      email\n      agent{\n        partners{\n          id\n          name\n        }\n      }\n    }\n  }\n}",
+										"variables": "{\n    \"email\" : \"agent.test@gmial.com\",\n    \"password\" : \"555555\"\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "searchCustomer by tags",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var body = JSON.parse(responseBody);",
+											"const jsonData = pm.response.json();",
+											"",
+											"//check that response is not empty ",
+											"pm.test(\"Response is not empty\", function () {",
+											"    pm.expect(jsonData.data.searchCustomer.items).to.not.have.lengthOf(0);",
+											"});",
+											"",
+											"",
+											"pm.test(\"Body matches string\", function () {",
+											"    pm.expect(pm.response.text()).to.include( \"91-120\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{Agent-token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query searchCustomer ($page: Page!, $q: CustomerSearchRequest) {\n    searchCustomer (page: $page, q: $q) {\n        items {\n            id\n            partnerId\n            agentId\n            userId\n            loanId\n            systemId\n            name\n            address\n            lga\n            city\n            state\n            accountNumber\n            bankName\n            telephone\n            userTelephone\n            bvnNumber\n            bvnTelephone\n            guarantorName\n            guarantorAddress\n            guarantorTelephone\n            guarantorRelationship\n            createdAt\n            updatedAt\n            assignedAt\n            weight\n            risk\n            classification\n            dnd\n            dndAt\n            tags\n            balanceRemaining\n            instalments{\n                id\n                amountPreviouslyPaidByCustomer\n                amountCollected\n            }\n        }\n      }\n  }\n",
+										"variables": "{\n  \"page\": {\n    \"number\": 1,\n    \"size\": 10,\n    \"sortBy\": \"updated_at\",\n    \"sortDirectionDesc\": true\n  },\n  \"q\": {\n    \"partnerIds\": [\n        \"fbeca4ee-c5f0-47f3-99d6-3adec9a2907f\"\n    ],\n    \"agentId\": \"539a421d-0eef-4b9c-84b1-d64b3079e86e\",\n    \"completed\": false,\n    \"strictlyHasInstalment\": true,\n     \"reached\": false,\n     \"ptpType\": null,\n     \"tag\": \"91-120\"\n  }\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "searchCustomer",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var body = JSON.parse(responseBody);",
+											"const jsonData = pm.response.json();",
+											"",
+											"//check that response is not empty ",
+											"pm.test(\"Response is not empty\", function () {",
+											"    pm.expect(jsonData.data.searchCustomer.items).to.not.have.lengthOf(0);",
+											"});",
+											"",
+											"",
+											"",
+											"",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{Agent-token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query searchCustomer ($page: Page!, $q: CustomerSearchRequest) {\n    searchCustomer (page: $page, q: $q) {\n        items {\n            id\n            partnerId\n            agentId\n            userId\n            loanId\n            systemId\n            name\n            address\n            lga\n            city\n            state\n            accountNumber\n            bankName\n            telephone\n            userTelephone\n            bvnNumber\n            bvnTelephone\n            guarantorName\n            guarantorAddress\n            guarantorTelephone\n            guarantorRelationship\n            createdAt\n            updatedAt\n            assignedAt\n            weight\n            risk\n            classification\n            dnd\n            dndAt\n            tags\n            balanceRemaining\n            instalments{\n                id\n                amountPreviouslyPaidByCustomer\n                amountCollected\n            }\n        }\n      }\n  }\n",
+										"variables": "{\n  \"page\": {\n    \"number\": 1,\n    \"size\": 10,\n    \"sortBy\": \"updated_at\",\n    \"sortDirectionDesc\": true\n  },\n  \"q\": {\n    \"partnerIds\": [\n        \"fbeca4ee-c5f0-47f3-99d6-3adec9a2907f\",\n        \"89e47c63-406f-46a6-8f4f-82af8eb963cf\"\n    ],\n    \"completed\": false,\n    \"strictlyHasInstalment\": true,\n     \"reached\": true,\n     \"ptpType\": null\n  }\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "searchMessageTemplate",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"",
+											"var body = JSON.parse(responseBody);",
+											"const jsonData = pm.response.json();",
+											"",
+											"//check that response is not empty ",
+											"pm.test(\"Response is not empty\", function () {",
+											"    pm.expect(jsonData.data.searchMessageTemplate.items).to.not.have.lengthOf(0);",
+											"});",
+											"",
+											"pm.test(\"Message channel is sms\", function () {",
+											"  pm.expect(jsonData.data.searchMessageTemplate.items[0].channels[1]).to.eql(\"sms\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{Agent-token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query searchMessageTemplate ($page: Page!, $active: Boolean) {\n    searchMessageTemplate (page: $page, active: $active) {\n        items {\n            id\n            message\n            active\n            channels\n            createdAt\n            updatedAt\n        }\n        pageInfo {\n            page\n            size\n            hasNextPage\n            hasPreviousPage\n            totalCount\n        }\n    }\n}",
+										"variables": "{\n  \"page\": {\n    \"number\": 1,\n    \"size\": 10,\n    \"sortBy\": \"created_at\",\n    \"sortDirectionDesc\": true\n  },\n  \"active\": true\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "searchCustomerByPtpDate",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"   const jsonData = pm.response.json();",
+											"   const customer_name = 'Christiana Banigo'",
+											"   const customer_balance = 174378.84",
+											"",
+											"",
+											"pm.test(\"Response is not empty\", function () {",
+											"    pm.expect(jsonData.data.searchCustomerByPtpDate.items).to.not.have.lengthOf(0);",
+											"});",
+											"",
+											"pm.test(\"Customer has an outstanding balance to pay\", function () {",
+											"    pm.expect(jsonData.data.searchCustomerByPtpDate.items[0].name).to.eql(customer_name)",
+											"});",
+											"",
+											"pm.test(\"Customer has an outstanding balance to pay\", function () {",
+											"    pm.expect(jsonData.data.searchCustomerByPtpDate.items[0].balanceRemaining).to.eql(customer_balance)",
+											"});",
+											"",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{Agent-token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query searchCustomerByPtpDate ($page: Page!, $day: String!) {\n    searchCustomerByPtpDate (page: $page, day: $day) {\n        items {\n            id\n            loanId\n            name\n            tags\n          balanceRemaining\n          instalments{\n            id\n            customerId\n            loanInstalmentId\n            totalAmountToRepay\n            \n          }\n        }\n  }\n  \n}",
+										"variables": "{\n  \"page\": {\n    \"number\": 1,\n    \"size\": 10,\n    \"sortBy\": \"created_at\",\n    \"sortDirectionDesc\": true\n  },\n  \"day\": \"2021-12-31\"\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "findCustomerPtps",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const ptp_amount = 5000",
+											"const jsonData = pm.response.json();",
+											"",
+											"//verify ptp-amount costs #10,000",
+											"pm.test(\"Body contains ptp_amount\", function () {",
+											"    pm.expect(jsonData.data.findCustomerPtps[0].amount).to.eql(ptp_amount);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{Agent-token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query findCustomerPtps ($customerID: String!) {\n    findCustomerPtps (customerID: $customerID) {\n        id\n        partnerId\n        customerId\n        agentId\n        customerReportId\n        loanId\n        amount\n        amountPaid\n        ptpDate\n        isMultiple\n        actualPaymentDate\n        paymentStatus\n        submittedBy\n        updatedBy\n        submitterKind\n        updaterKind\n        description\n        createdAt\n        updatedAt\n        deletedAt\n        isVerified\n        ptpTypeName \n    }\n}",
+										"variables": "{\n  \"customerID\": \"199ce1ff-3851-4461-b065-a0c0aa9c0f1e\"\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "submitCustomerReport wirth an existing ptp",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const jsonData = pm.response.json();",
+											"",
+											"pm.test(\"ptp date limit test passed\", function () {",
+											"    pm.expect(jsonData.errors[0].message).to.eql( \"you already have an active ptp, which you can only update\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{Agent-token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "mutation submitCustomerReport ($input: CustomerReportRequest!) {\n    submitCustomerReport (input: $input) {\n        id\n        agentId\n        staffId\n        customerId\n        type\n        comment\n        hasPtp\n        meta\n        attachments\n        createdAt\n        updatedAt\n        customerPtps {\n            id\n            partnerId\n            customerId\n            agentId\n            customerReportId\n            loanId\n            amount\n            amountPaid\n            ptpDate\n            frequency\n            isMultiple\n            actualPaymentDate\n            paymentStatus\n            submittedBy\n            updatedBy\n            submitterKind\n            updaterKind\n            description\n            rescheduleCount\n            isVerified\n            ptpTypeName\n            createdAt\n            updatedAt\n            deletedAt\n        }\n        submitterKind\n    }\n}",
+										"variables": "{\n  \"input\": {\n    \"customerId\": \"ca419630-a101-4ab7-a9cb-22b72660ff29\",\n    \"type\": \"call\",\n    \"comment\": \"ok test\",\n    \"meta\": {\"name\": \"yes\"},\n    \"attachments\": [\n    ],\n    \"customerPtp\": {\n      \"partnerId\":  \"fbeca4ee-c5f0-47f3-99d6-3adec9a2907f\",\n      \"loanId\": \"307764320866\",\n      \"amount\": 100000.00,\n      \"frequency\": \"bi_weekly\",\n      \"ptpDate\": \"2022-12-31\",\n      \"description\": \"ok test\",\n       \"ptpTypeName\": \"standard_case_ptp\"\n    },\n    \"reachable\": true\n  }\n}\n"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "submitCustomerReport wirth a past date",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const jsonData = pm.response.json();",
+											"",
+											"pm.test(\"ptp date limit test passed\", function () {",
+											"    pm.expect(jsonData.errors[0].message).to.eql( \"you cannot provide a ptp_date in the past\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{Agent-token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "mutation submitCustomerReport ($input: CustomerReportRequest!) {\n    submitCustomerReport (input: $input) {\n        id\n        agentId\n        staffId\n        customerId\n        type\n        comment\n        hasPtp\n        meta\n        attachments\n        createdAt\n        updatedAt\n        customerPtps {\n            id\n            partnerId\n            customerId\n            agentId\n            customerReportId\n            loanId\n            amount\n            amountPaid\n            ptpDate\n            frequency\n            isMultiple\n            actualPaymentDate\n            paymentStatus\n            submittedBy\n            updatedBy\n            submitterKind\n            updaterKind\n            description\n            rescheduleCount\n            isVerified\n            ptpTypeName\n            createdAt\n            updatedAt\n            deletedAt\n        }\n        submitterKind\n    }\n}",
+										"variables": "{\n  \"input\": {\n    \"customerId\": \"ca419630-a101-4ab7-a9cb-22b72660ff29\",\n    \"type\": \"call\",\n    \"comment\": \"ok test\",\n    \"meta\": {\"name\": \"yes\"},\n    \"attachments\": [\n    ],\n    \"customerPtp\": {\n      \"partnerId\":  \"fbeca4ee-c5f0-47f3-99d6-3adec9a2907f\",\n      \"loanId\": \"307764320866\",\n      \"amount\": 100000.00,\n      \"frequency\": \"bi_weekly\",\n      \"ptpDate\": \"2021-03-28\",\n      \"description\": \"ok test\",\n       \"ptpTypeName\": \"standard_case_ptp\"\n    },\n    \"reachable\": true\n  }\n}\n"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "submitCustomerReport with lesser amount for minimum one time payment percentage",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const jsonData = pm.response.json();",
+											"const error_message = \"ptp amount cannot be lesser than 700.00 minimum payment value (mpv)\"",
+											"",
+											"pm.test(\"ptp date limit test passed\", function () {",
+											"    pm.expect(jsonData.errors[0].message).to.eql(error_message);",
+											"",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{Agent-token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "mutation submitCustomerReport ($input: CustomerReportRequest!) {\n    submitCustomerReport (input: $input) {\n        id\n        agentId\n        staffId\n        customerId\n        type\n        comment\n        hasPtp\n        meta\n        attachments\n        createdAt\n        updatedAt\n        customerPtps {\n            id\n            partnerId\n            customerId\n            agentId\n            customerReportId\n            loanId\n            amount\n            amountPaid\n            ptpDate\n            frequency\n            isMultiple\n            actualPaymentDate\n            paymentStatus\n            submittedBy\n            updatedBy\n            submitterKind\n            updaterKind\n            description\n            rescheduleCount\n            isVerified\n            ptpTypeName\n            createdAt\n            updatedAt\n            deletedAt\n        }\n        submitterKind\n    }\n}",
+										"variables": "{\n  \"input\": {\n    \"customerId\": \"a73ac7d4-6fba-46df-8667-128121cf38ef\",\n    \"type\": \"call\",\n    \"comment\": \"ok test\",\n    \"meta\": {\"name\": \"yes\"},\n    \"attachments\": [\n    ],\n    \"customerPtp\": {\n      \"partnerId\":  \"89e47c63-406f-46a6-8f4f-82af8eb963cf\",\n      \"loanId\": \"18654666\",\n      \"amount\": 500.00,\n      \"ptpDate\": \"2022-01-24\",\n      \"description\": \"ok test\",\n       \"ptpTypeName\": \"standard_case_ptp\"\n    },\n    \"reachable\": true\n  }\n}\n"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "submitCustomerReport above scheduled number of allowed ptp days",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const jsonData = pm.response.json();",
+											"",
+											"pm.test(\"ptp date limit test passed\", function () {",
+											"    pm.expect(jsonData.errors[0].message).to.eql( \"ptp date cannot exceed 15 days\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{Agent-token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "mutation submitCustomerReport ($input: CustomerReportRequest!) {\n    submitCustomerReport (input: $input) {\n        id\n        agentId\n        staffId\n        customerId\n        type\n        comment\n        hasPtp\n        meta\n        attachments\n        createdAt\n        updatedAt\n        customerPtps {\n            id\n            partnerId\n            customerId\n            agentId\n            customerReportId\n            loanId\n            amount\n            amountPaid\n            ptpDate\n            frequency\n            isMultiple\n            actualPaymentDate\n            paymentStatus\n            submittedBy\n            updatedBy\n            submitterKind\n            updaterKind\n            description\n            rescheduleCount\n            isVerified\n            ptpTypeName\n            createdAt\n            updatedAt\n            deletedAt\n        }\n        submitterKind\n    }\n}",
+										"variables": "{\n  \"input\": {\n    \"customerId\": \"e217be9e-2aff-445e-8462-ed05e405e4bf\",\n    \"type\": \"call\",\n    \"comment\": \"ok test\",\n    \"meta\": {\"name\": \"yes\"},\n    \"attachments\": [\n    ],\n    \"customerPtp\": {\n      \"partnerId\":  \"fbeca4ee-c5f0-47f3-99d6-3adec9a2907f\",\n      \"loanId\": \"306560105687\",\n      \"amount\": 10000.00,\n      \"frequency\": \"bi_weekly\",\n      \"ptpDate\": \"2022-05-28\",\n      \"description\": \"ok test\",\n       \"ptpTypeName\": \"standard_case_ptp\"\n    },\n    \"reachable\": true\n  }\n}\n"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getPhoneNumberStatuses",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const jsonData = pm.response.json();",
+											"",
+											"pm.test(\"Body contains result \", function () {",
+											"  //pm.expect(jsonData.data.getPhoneNumberStatuses[0,1,2]).to.not.equal(0);",
+											" pm.expect(jsonData.data.getPhoneNumberStatuses).to.not.be.empty",
+											"  ",
+											"});",
+											"",
+											" //verify that customer was reached by call ",
+											"pm.test(\"customer was reached by call\", function () {",
+											" pm.expect(jsonData.data.getPhoneNumberStatuses[0].reachedByCall).eql(true);",
+											"});",
+											"",
+											"",
+											" //verify that customer was reached by whatsapp ",
+											"pm.test(\"customer was reached by whatsapp\", function () {",
+											" pm.expect(jsonData.data.getPhoneNumberStatuses[0].reachedViaWhatsApp).eql(true);",
+											"});",
+											"",
+											" //verify that body contains customer telephone number",
+											"pm.test(\"Body matches string\", function () {",
+											" pm.expect(jsonData.data.getPhoneNumberStatuses[0].telephone).eql(\"8024077711\");",
+											"});",
+											"",
+											"",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{Agent-token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query ($country: String! $phones: [String!]) {\n   getPhoneNumberStatuses(countryCode:$country, phoneNos: $phones) {\n          id \n    \t\t\ttelephone\n          callDuration\n    \t\t\tcallDateTime\n    \t\t\treachedByCall\n    \t\t\ttimeReachedCount\n    \t\t\ttimeNotReached\n    \t\t\ttimeLastReached\n          reachedViaWhatsApp\n          createdAt\n    }\n} ",
+										"variables": "{\n  \"country\": \"ng\",\n  \"phones\": [\n  \"8024077711\",\n  \"8011111111\",\n  \"8011111555\"\n\n\n  ]\n}\n"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "findCustomersByPhoneNumber",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"const jsonData = pm.response.json();",
+											"",
+											"pm.test(\"Response is not empty\", function () {",
+											"    pm.expect(jsonData.data.findCustomersByPhoneNumber).to.not.have.lengthOf(0);",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{Agent-token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query findCustomersByPhoneNumber ($number: String!) {\n    findCustomersByPhoneNumber (number: $number) {\n        id\n        partnerId\n        agentId\n        userId\n        loanId\n        systemId\n        name\n        address\n        lga\n        city\n        state\n        accountNumber\n        bankName\n        telephone\n        userTelephone\n        bvnNumber\n        bvnTelephone\n        guarantorName\n        guarantorAddress\n        guarantorTelephone\n        guarantorRelationship\n        createdAt\n        updatedAt\n        assignedAt\n        weight\n        risk\n        classification\n        dnd\n        dndAt\n        tags\n       \n  }\n}",
+										"variables": "{\n  \"number\": \"8022222222\"\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "findCustomersByLoanID",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"const jsonData = pm.response.json();",
+											"const loan = '18654666'",
+											"const name = \"Titus Imeh Ekpeowoh 30%\"",
+											"",
+											"pm.test(\"Response is not empty\", function () {",
+											"    pm.expect(jsonData.data.findCustomersByLoanID).to.not.have.lengthOf(0);",
+											"});",
+											"",
+											"pm.test(\"Body matches string\", function () {",
+											"    pm.expect(jsonData.data.findCustomersByLoanID[0].loanId).to.eql(loan)",
+											"});",
+											"",
+											"pm.test(\"Body matches string\", function () {",
+											"    pm.expect(jsonData.data.findCustomersByLoanID[0].name).to.eql(name)",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{Agent-token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query findCustomersByLoanID ($loanID: String!, $partnerId: String) {\n    findCustomersByLoanID (loanID: $loanID, partnerId: $partnerId) {\n        id\n        partnerId\n        agentId\n        userId\n        loanId\n        systemId\n        name\n        address\n        lga\n        city\n        state\n        accountNumber\n        bankName\n        telephone\n        userTelephone\n        bvnNumber\n        bvnTelephone\n        guarantorName\n        guarantorAddress\n        guarantorTelephone\n        guarantorRelationship\n        createdAt\n        updatedAt\n        assignedAt\n        weight\n        risk\n        classification\n        dnd\n        dndAt\n        tags\n  }\n}",
+										"variables": "{\n  \"loanID\": \"18654666\",\n  \"partnerId\":\"89e47c63-406f-46a6-8f4f-82af8eb963cf\"\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "admin",
+					"item": [
+						{
+							"name": "Login as an admin with incorrect password",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"  const jsonData = pm.response.json();",
+											"",
+											"pm.test(\"Body contains string\", function () {",
+											"    pm.expect(jsonData.errors[0].message).to.eql(\"incorrect email or password\");",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query authenticate($email: String!, $password: String!) {\n  authenticate(email:$email, password:$password){\n    token\n    refresh\n    user {\n        id\n        name\n        kind\n        state\n        email\n    }\n    accessTokenExpiry\n  }\n}",
+										"variables": "{\n    \"email\" : \"tech@bfree.africa\",\n    \"password\" : \"passwor\"\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Login as an admin",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"//Set access token as environment variable",
+											"const jsonData = pm.response.json();",
+											"const body = JSON.parse(responseBody);",
+											"pm.environment.set(\"Admin-token\", body.data.authenticate.token);",
+											"",
+											"const id = \"2129e445-4e20-4bc7-b6fa-5f60ba12f317\"",
+											"const name = \"tech\"",
+											"const kind = \"Administrator\"",
+											"const email = \"tech@bfree.africa\"",
+											"",
+											"pm.test(\"Body contains customer Id \", function () {",
+											"    pm.expect(jsonData.data.authenticate.user.id).to.eql(id);",
+											"});",
+											"",
+											"pm.test(\"Body contains name \", function () {",
+											"    pm.expect(jsonData.data.authenticate.user.name).to.eql(name);",
+											"});",
+											"",
+											"pm.test(\"Body contains kind \", function () {",
+											"    pm.expect(jsonData.data.authenticate.user.kind).to.eql(kind);",
+											"});",
+											"",
+											"pm.test(\"Body contains email \", function () {",
+											"    pm.expect(jsonData.data.authenticate.user.email).to.eql(email);",
+											"});",
+											"",
+											"",
+											"pm.test(\"Content-Type is present\", function () {",
+											"    pm.response.to.have.header(\"Content-Type\");",
+											"});",
+											"",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query authenticate($email: String!, $password: String!) {\n  authenticate(email:$email, password:$password){\n    token\n    refresh\n    user {\n        id\n        name\n        kind\n        state\n        email\n    }\n    accessTokenExpiry\n  }\n}",
+										"variables": "{\n    \"email\" : \"tech@bfree.africa\",\n    \"password\" : \"password\"\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "searchCustomer",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var body = JSON.parse(responseBody);",
+											"const jsonData = pm.response.json();",
+											"",
+											"//check that response is not empty ",
+											"pm.test(\"Response is not empty\", function () {",
+											"    pm.expect(jsonData.data.searchCustomer.items).to.not.have.lengthOf(0);",
+											"});",
+											"",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{Admin-token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query searchCustomer ($page: Page!, $q: CustomerSearchRequest) {\n    searchCustomer (page: $page, q: $q) {\n        items {\n            id\n            partnerId\n            agentId\n            userId\n            loanId\n            systemId\n            name\n            address\n            lga\n            city\n            state\n            accountNumber\n            bankName\n            telephone\n            userTelephone\n            bvnNumber\n            bvnTelephone\n            guarantorName\n            guarantorAddress\n            guarantorTelephone\n            guarantorRelationship\n            createdAt\n            updatedAt\n            assignedAt\n            weight\n            risk\n            classification\n            dnd\n            dndAt\n            tags\n            balanceRemaining\n            instalments{\n                id\n                amountPreviouslyPaidByCustomer\n                amountCollected\n            }\n        }\n      }\n  }\n",
+										"variables": "{\n  \"page\": {\n    \"number\": 1,\n    \"size\": 10,\n    \"sortBy\": \"updated_at\",\n    \"sortDirectionDesc\": true\n  },\n  \"q\": {\n    \"partnerIds\": [\n        \"fbeca4ee-c5f0-47f3-99d6-3adec9a2907f\",\n        \"89e47c63-406f-46a6-8f4f-82af8eb963cf\"\n    ],\n    \"completed\": false,\n    \"strictlyHasInstalment\": true,\n     \"reached\": false,\n     \"ptpType\": null\n  }\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "searchCustomer by tags",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var body = JSON.parse(responseBody);",
+											"const jsonData = pm.response.json();",
+											"",
+											"pm.test(\"Body contains customer\", function () {",
+											"     pm.expect(jsonData.data.searchCustomer.items[0].name).to.eql(\"Gideon Oreuben\");",
+											"       pm.expect(jsonData.data.searchCustomer.items[0].loanId).to.eql(\"307660836692\");",
+											"",
+											"        //search customer by tags",
+											"         pm.expect(jsonData.data.searchCustomer.items[0].tags).to.eql(\"91-120\");",
+											"});",
+											"",
+											"pm.test(\"Response is not empty\", function () {",
+											"    pm.expect(jsonData.data.searchCustomer.items).to.not.have.lengthOf(0);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{Admin-token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query searchCustomer ($page: Page!, $q: CustomerSearchRequest) {\n    searchCustomer (page: $page, q: $q) {\n        items {\n            id\n            partnerId\n            agentId\n            userId\n            loanId\n            systemId\n            name\n            address\n            lga\n            city\n            state\n            accountNumber\n            bankName\n            telephone\n            userTelephone\n            bvnNumber\n            bvnTelephone\n            guarantorName\n            guarantorAddress\n            guarantorTelephone\n            guarantorRelationship\n            createdAt\n            updatedAt\n            assignedAt\n            weight\n            risk\n            classification\n            dnd\n            dndAt\n            tags\n            balanceRemaining\n            instalments{\n                id\n                amountPreviouslyPaidByCustomer\n                amountCollected\n            }\n        }\n      }\n  }\n",
+										"variables": "{\n  \"page\": {\n    \"number\": 1,\n    \"size\": 10,\n    \"sortBy\": \"updated_at\",\n    \"sortDirectionDesc\": true\n  },\n  \"q\": {\n    \"partnerIds\": [\n        \"fbeca4ee-c5f0-47f3-99d6-3adec9a2907f\"\n    ],\n    \"agentId\": \"539a421d-0eef-4b9c-84b1-d64b3079e86e\",\n    \"completed\": false,\n    \"strictlyHasInstalment\": true,\n     \"reached\": false,\n     \"ptpType\": null,\n     \"tag\": \"91-120\"\n  }\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "reAssignAgentToCustomer",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const jsonData = pm.response.json();",
+											"",
+											"pm.test(\"Agent has been reassigned \", function () {",
+											"   pm.expect(jsonData.data.reAssignAgentToCustomer).to.eql(true);",
+											"    //pm.expect(jsonData.message).to.eql(\"Agent was reassigned successfully!\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{Admin-token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "mutation reAssignAgentToCustomer ($customerId: String!, $agentId: String!) {\n    reAssignAgentToCustomer (customerId: $customerId, agentId: $agentId)\n}",
+										"variables": "{\n  \"customerId\": \"95ef5193-b284-4685-9332-12ae95ce5ff8\",\n  \"agentId\": \"bda6179a-93d8-425c-ac52-d0c06a22763b\"\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "reAssignAgentToCustomer",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"value": "application/x-www-form-urlencoded",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "graphql",
+											"graphql": {
+												"query": "mutation reAssignAgentToCustomer ($customerId: String!, $agentId: String!) {\n    reAssignAgentToCustomer (customerId: $customerId, agentId: $agentId)\n}",
+												"variables": "{\n  \"customerId\": \"bc4d72a3-bdd9-4dff-9eac-674aa02feefa\",\n  \"agentId\": \"ce871b26-8e49-4adb-985b-03e2f7f38ad4\"\n}"
+											}
+										},
+										"url": {
+											"raw": "https://caa85de3-cf9a-4ef2-8c12-a484ae08731d.mock.pstmn.io",
+											"protocol": "https",
+											"host": [
+												"caa85de3-cf9a-4ef2-8c12-a484ae08731d",
+												"mock",
+												"pstmn",
+												"io"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": null,
+									"cookie": [],
+									"body": "{\n    \"message\": \"Agent was reassigned successfully!\"\n}"
+								}
+							]
+						},
+						{
+							"name": "searchPartner",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"var body = JSON.parse(responseBody);",
+											"tests[\"Body returns\" + \"   \" + body.data.searchPartner.items.length + \"   \" + \"Partners\"] = true",
+											"",
+											"",
+											"pm.test(\"Body matches string\", function () {",
+											"    pm.expect(pm.response.text()).to.include(\"Borome\");",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{Admin-token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query searchPartner ($page: Page!, $keyword: String!) {\n    searchPartner (page: $page, keyword: $keyword) {\n        items {\n            id\n            userId\n            name\n            description\n            website\n            logoUrl\n            accountNumber\n            accountName\n            bankName\n            active\n            settings\n            createdAt\n            updatedAt\n        }\n        pageInfo {\n            page\n            size\n            hasNextPage\n            hasPreviousPage\n            totalCount\n        }\n    }\n}",
+										"variables": "{\n  \"page\": {\n    \"number\": 1,\n    \"size\": 10,\n    \"sortBy\": \"name\",\n    \"sortDirectionDesc\": true\n  },\n  \"keyword\": \"\"\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "findOnePartner",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const jsonData = pm.response.json();",
+											"const id = 'f7c46026-7c50-4d99-932e-91ca8c3fbb84'",
+											"const partner_name = 'Borome'",
+											"",
+											"",
+											"pm.test(\"Body contains Partner Id \", function () {",
+											"    pm.expect(jsonData.data.findOnePartner.id).to.eql(id);",
+											"});",
+											"",
+											"pm.test(\"Body contains Partner Name \", function () {",
+											"    pm.expect(jsonData.data.findOnePartner.name).to.eql(partner_name);",
+											"});",
+											"",
+											"pm.test(\"Partner is active \", function () {",
+											"    pm.expect(jsonData.data.findOnePartner.active).to.eql(true);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{Admin-token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query findOnePartner ($id: String!) {\n    findOnePartner (id: $id) {\n        id\n        name\n        description\n        website\n        logoUrl\n        accountNumber\n        accountName\n        bankName\n        active\n        settings\n        createdAt\n        updatedAt\n    }\n}",
+										"variables": "{\n  \"id\": \"f7c46026-7c50-4d99-932e-91ca8c3fbb84\"\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "searchMessageTemplate",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"",
+											"const jsonData = pm.response.json();",
+											"pm.test(\"Response is not empty\", function () {",
+											"    pm.expect(jsonData.data.searchMessageTemplate.items).to.not.have.lengthOf(0);",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{Admin-token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query searchMessageTemplate ($page: Page!, $active: Boolean) {\n    searchMessageTemplate (page: $page, active: $active) {\n        items {\n            id\n            message\n            active\n            channels\n            createdAt\n            updatedAt\n        }\n        pageInfo {\n            page\n            size\n            hasNextPage\n            hasPreviousPage\n            totalCount\n        }\n    }\n}",
+										"variables": "{\n  \"page\": {\n    \"number\": 1,\n    \"size\": 10,\n    \"sortBy\": \"created_at\",\n    \"sortDirectionDesc\": true\n  },\n  \"active\": true\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "findCustomerPtps",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const ptp_amount = 10000",
+											"const jsonData = pm.response.json();",
+											"",
+											"//verify ptp-amount costs #10,000",
+											"pm.test(\"Body contains ptp_amount\", function () {",
+											"    pm.expect(jsonData.data.findCustomerPtps[0].amount).to.eql(ptp_amount);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{Admin-token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query findCustomerPtps ($customerID: String!) {\n    findCustomerPtps (customerID: $customerID) {\n        id\n        partnerId\n        customerId\n        agentId\n        customerReportId\n        loanId\n        amount\n        amountPaid\n        ptpDate\n        isMultiple\n        actualPaymentDate\n        paymentStatus\n        submittedBy\n        updatedBy\n        submitterKind\n        updaterKind\n        description\n        createdAt\n        updatedAt\n        deletedAt\n    }\n}",
+										"variables": "{\n  \"customerID\": \"4c56ec4d-f0db-4b49-9497-326d15579344\"\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "fetchPartnerAPICredentials",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const jsonData = pm.response.json();",
+											"const partnerId = \"f7c46026-7c50-4d99-932e-91ca8c3fbb84\"",
+											"const secretKey = \"mB9GGcd1gvSnJGtbwHBzC8M7xHLWU777FG5978uT\"",
+											"const accessKey = \"S56ADHIXM8CRB9ULOLTJ\"",
+											"",
+											"pm.test(\"Body contains partnerId\", function () {",
+											"    pm.expect(jsonData.data.fetchPartnerAPICredentials[0].partnerID).to.eql(partnerId);",
+											"});",
+											"",
+											"pm.test(\"Body contains accessKey\", function () {",
+											"    pm.expect(jsonData.data.fetchPartnerAPICredentials[0].accessKey).to.eql(accessKey);",
+											"});",
+											"",
+											"pm.test(\"Body contains secretKey\", function () {",
+											"    pm.expect(jsonData.data.fetchPartnerAPICredentials[0].secret).to.eql(secretKey);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{Admin-token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query fetchPartnerAPICredentials ($partnerId: String!) {\n    fetchPartnerAPICredentials (partnerId: $partnerId) {\n        id\n        partnerID\n        accessKey\n        secret\n        isActive\n        submittedBy\n        updatedBy\n        createdAt\n        updatedAt\n        deletedAt\n    }\n}",
+										"variables": "{\n  \"partnerId\": \"f7c46026-7c50-4d99-932e-91ca8c3fbb84\"\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "findOneCustomer",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const jsonData = pm.response.json();",
+											"const loandId  = \"9091111\"",
+											"const partnerId = \"89e47c63-406f-46a6-8f4f-82af8eb963cf\"",
+											"const name = \"Dangote Abraham\"",
+											"",
+											"pm.test(\"Body contains Loan Id \", function () {",
+											"    pm.expect(jsonData.data.findOneCustomer.loanId).to.eql(loandId);",
+											"});",
+											"",
+											"pm.test(\"Body contains partner Id \", function () {",
+											"    pm.expect(jsonData.data.findOneCustomer.partnerId).to.eql(partnerId);",
+											"});",
+											"",
+											"pm.test(\"Body contains customer name \", function () {",
+											"    pm.expect(jsonData.data.findOneCustomer.name).to.eql(name);",
+											"});",
+											"",
+											"pm.test(\"Body contains customer name \", function () {",
+											"    pm.expect(jsonData.data.findOneCustomer.name).to.eql(name);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{Admin-token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query findOneCustomer ($id: String!) {\n    findOneCustomer (id: $id) {\n        id\n        partnerId\n        agentId\n        userId\n        loanId\n        systemId\n        name\n        address\n        lga\n        city\n        state\n        accountNumber\n        bankName\n        telephone\n        userTelephone\n        bvnNumber\n        bvnTelephone\n        guarantorName\n        guarantorTelephone\n        guarantorRelationship\n        createdAt\n        updatedAt\n        assignedAt\n        weight\n        risk\n        classification\n        dnd\n        dndAt\n        tags\n        partner {\n            id\n            name\n            description\n            website\n            logoUrl\n            accountNumber\n            accountName\n            bankName\n            active\n            settings\n            createdAt\n            updatedAt\n        }\n        agent {\n            id\n            userId\n            designation\n            commission\n            settlementBankName\n            settlementBankAccountNumber\n            settlementBankAccountName\n            kind\n            active\n            updatedAt\n            staffId\n            partnerIds\n            extensionNumber\n            performance {\n                totalEarnings\n                totalCollections\n                totalUnpaidCommissions\n                totalUnpaidCommissionsFrom\n                totalUnpaidCommissionsTo\n            }\n            collection {\n                id\n                agentId\n                reportId\n                agentCommissionAmount\n                partnerCommissionAmount\n                agentCommissionPercentage\n                amount\n                description\n                balanceBefore\n                balanceAfter\n                paidAfter\n                settled\n                createdAt\n                agent {\n                    id\n                    userId\n                    designation\n                    commission\n                    settlementBankName\n                    settlementBankAccountNumber\n                    settlementBankAccountName\n                    kind\n                    active\n                    updatedAt\n                    staffId\n                    partnerIds\n                    extensionNumber\n                }\n                customer {\n                    id\n                    partnerId\n                    agentId\n                    userId\n                    loanId\n                    systemId\n                    name\n                    address\n                    lga\n                    city\n                    state\n                    accountNumber\n                    bankName\n                    telephone\n                    userTelephone\n                    bvnNumber\n                    bvnTelephone\n                    guarantorName\n                    guarantorTelephone\n                    guarantorRelationship\n                    createdAt\n                    updatedAt\n                    assignedAt\n                    weight\n                    risk\n                    classification\n                    dnd\n                    dndAt\n                    tags\n                   \n                    agent {\n                        id\n                        userId\n                        designation\n                        commission\n                        settlementBankName\n                        settlementBankAccountNumber\n                        settlementBankAccountName\n                        kind\n                        active\n                        updatedAt\n                        staffId\n                        partnerIds\n                        extensionNumber\n                    }\n                    gender\n                    email\n                    dob\n                    registeredTelephoneNumber\n                    otpPinId\n                    lastLoggedIn\n                    plan {\n                        id\n                        planDaily\n                        planWeekly\n                        planMonthly\n                        planYearly\n                        note\n                        createdAt\n                        updatedAt\n                    }\n                    instalments {\n                        id\n                        customerId\n                        loanId\n                        loanInstalmentId\n                        totalAmountToRepay\n                        totalAmountAutoDebit\n                        selfPayment\n                        paidAfter\n                        repaid\n                        createdAt\n                        campaign\n                        dueDate\n                        disbursementDate\n                        originalAmountToPay\n                        originalPrincipalToPay\n                        originalInterestToPay\n                        originalLateFees\n                        amountToPayIncludingFees\n                        customerDiscount\n                        numberOfInstalments\n                        daysLate\n                        enteredAt\n                        updatedAt\n                        deletedAt\n                        completed\n                        amountCollected\n                        amountPreviouslyPaidByCustomer\n                    }\n                    reports {\n                        id\n                        agentId\n                        staffId\n                        type\n                        comment\n                        meta\n                        createdAt\n                        updatedAt\n                    }\n                    collections {\n                        id\n                        agentId\n                        reportId\n                        agentCommissionAmount\n                        partnerCommissionAmount\n                        amount\n                        description\n                        balanceBefore\n                        balanceAfter\n                        paidAfter\n                        settled\n                        createdAt\n                    }\n                    channel\n                }\n            }\n        }\n        gender\n        email\n        dob\n        registeredTelephoneNumber\n        otpPinId\n        lastLoggedIn\n        plan {\n            id\n            planDaily\n            planWeekly\n            planMonthly\n            planYearly\n            note\n            createdAt\n            updatedAt\n        }\n        instalments {\n            id\n            customerId\n            loanId\n            loanInstalmentId\n            totalAmountToRepay\n            totalAmountAutoDebit\n            selfPayment\n            paidAfter\n            repaid\n            createdAt\n            campaign\n            dueDate\n            disbursementDate\n            originalAmountToPay\n            originalPrincipalToPay\n            originalInterestToPay\n            originalLateFees\n            amountToPayIncludingFees\n            customerDiscount\n            numberOfInstalments\n            daysLate\n            enteredAt\n            updatedAt\n            deletedAt\n            completed\n            amountCollected\n            amountPreviouslyPaidByCustomer\n        }\n        reports {\n            id\n            agentId\n            staffId\n            type\n            comment\n            meta\n            createdAt\n            updatedAt\n            customerPtps {\n                id\n                partnerId\n                customerId\n                agentId\n                customerReportId\n                loanId\n                amount\n                ptpDate\n                isMultiple\n                actualPaymentDate\n                paymentStatus\n                submittedBy\n                updatedBy\n                submitterKind\n                updaterKind\n                createdAt\n                updatedAt\n                deletedAt\n            }\n        }\n        collections {\n            id\n            agentId\n            reportId\n            agentCommissionAmount\n            partnerCommissionAmount\n            amount\n            description\n            balanceBefore\n            balanceAfter\n            paidAfter\n            settled\n            createdAt\n            agent {\n                id\n                userId\n                designation\n                commission\n                settlementBankName\n                settlementBankAccountNumber\n                settlementBankAccountName\n                kind\n                active\n                updatedAt\n                staffId\n                partnerIds\n                extensionNumber\n            }\n            customer {\n                id\n                partnerId\n                agentId\n                userId\n                loanId\n                systemId\n                name\n                address\n                lga\n                city\n                state\n                accountNumber\n                bankName\n                telephone\n                userTelephone\n                bvnNumber\n                bvnTelephone\n                guarantorName\n                guarantorTelephone\n                guarantorRelationship\n                createdAt\n                updatedAt\n                assignedAt\n                weight\n                risk\n                classification\n                dnd\n                dndAt\n                tags\n                gender\n                email\n                dob\n                registeredTelephoneNumber\n                otpPinId\n                lastLoggedIn\n                channel\n            }\n        }\n        channel\n    }\n}",
+										"variables": "{\n  \"id\": \"93c7528a-62a7-4383-90f5-307d8951701b\"\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "searchCustomerByPtpDate",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"   const jsonData = pm.response.json();",
+											"   const name = pm.variables.get(\"name\")",
+											"   const customer_balance = pm.variables.get(\"balanceRemaining\") ",
+											"",
+											"pm.test(\"Response is not empty\", function () {",
+											"    pm.expect(jsonData.data.searchCustomerByPtpDate.items).to.not.have.lengthOf(0);",
+											"});",
+											"",
+											"pm.test(\"Body matches string\", function () {",
+											"    pm.expect(jsonData.data.searchCustomerByPtpDate.items.name).to.eql(name)",
+											"});",
+											"",
+											"pm.test(\"Customer has an outstanding balance to pay\", function () {",
+											"    pm.expect(jsonData.data.searchCustomerByPtpDate.items.balanceRemaining).to.eql(customer_balance)",
+											"",
+											"});",
+											"",
+											"",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{Admin-token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query searchCustomerByPtpDate ($page: Page!, $day: String!) {\n    searchCustomerByPtpDate (page: $page, day: $day) {\n        items {\n            id\n            loanId\n            name\n            tags\n          balanceRemaining\n          instalments{\n            id\n            customerId\n            loanInstalmentId\n            totalAmountToRepay\n            \n          }\n        }\n  }\n  \n}",
+										"variables": "{\n  \"page\": {\n    \"number\": 1,\n    \"size\": 10,\n    \"sortBy\": \"created_at\",\n    \"sortDirectionDesc\": true\n  },\n  \"day\": \"2021-11-30\"\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "countEligibleCustomers",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const jsonData = pm.response.json();",
+											"",
+											"pm.test(\"Eligible customers are counted\", function () {",
+											"  pm.expect(jsonData.data.countEligibleCustomers).to.not.equal(0);",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{Admin-token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query countEligibleCustomers ($campaign: MessageCampaignRequest) {\n    countEligibleCustomers (campaign: $campaign)\n}",
+										"variables": "{\n  \"campaign\": {\n    \"mode\": 1,\n    \"timeOfDay\": 2,\n    \"dateFrom\": \"2021-09-22\",\n    \"dateTo\": \"2021-09-24\",\n    \"message\": \"ok test\",\n    \"partners\": [\n      \"89e47c63-406f-46a6-8f4f-82af8eb963cf\",\n      \"ce1261c4-4b4c-470b-b255-3755e06bbc42\", \"f7c46026-7c50-4d99-932e-91ca8c3fbb84\",\n      \"fbeca4ee-c5f0-47f3-99d6-3adec9a2907f\"\n      ,\n      \"bf5b428b-d646-4d2d-82f4-ab370cb4a524\",\n      \"eef65271-e8e6-439e-b47f-d0c48d716798\",\n      \"ce913165-fb28-4a63-814e-1b2037e4e10a\"\n    ],\n    \"channels\": [\"sms\"],\n    \"dispatchAt\": \"2021-09-22\"\n  }\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getSettingByID",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const jsonData = pm.response.json();",
+											"//Assert settings type",
+											"pm.test(\"Response contains settingsType\", function () {",
+											"    pm.expect(jsonData.data.getSettingByID.settingsType).eql(\"virtual_account_settlement_settings\")",
+											"});",
+											"",
+											"//Assert dpd name",
+											"pm.test(\"Response contains dpdname\", function () {",
+											" pm.expect(jsonData.data.getSettingByID.settings.virtual_account_settlement_setting.vendor).eql(\"monnify\");",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{Admin-token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query getSettingByID ($id: String!) {\n    getSettingByID (id: $id) {\n        id\n        settingsType\n        description\n        settings\n        createdAt\n        updatedAt\n    }\n}",
+										"variables": "{\n  \"id\": \"95f3b2ba-0cec-4022-890f-4b3cc7c1161a\"\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getAllGeneralSettingsByType",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const jsonData = pm.response.json();",
+											"",
+											"pm.test(\"Response is not empty\", function () {",
+											"    pm.expect(jsonData.data.getGeneralSettingsByType).to.not.have.lengthOf(0);",
+											"});",
+											"",
+											"//Assert settings type",
+											"pm.test(\"Response contains settingsType\", function () {",
+											"    pm.expect(jsonData.data.getGeneralSettingsByType[0].settingsType).eql(\"virtual_account_settlement_settings\")",
+											"});",
+											"",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{Admin-token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query getGeneralSettingsByType($settingsType: String!) {\n      getGeneralSettingsByType (settingsType: $settingsType)\n  \n  {\n    id\n    settingsType\n    description\n    settings\n    createdAt\n    updatedAt\n  }\n  \n}  ",
+										"variables": "{\n  \"settingsType\": \"virtual_account_settlement_settings\"\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "findCustomersByPhoneNumber",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"const jsonData = pm.response.json();",
+											"",
+											"pm.test(\"Response is not empty\", function () {",
+											"    pm.expect(jsonData.data.findCustomersByPhoneNumber).to.not.have.lengthOf(0);",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{Admin-token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query findCustomersByPhoneNumber ($number: String!) {\n    findCustomersByPhoneNumber (number: $number) {\n        id\n        partnerId\n        agentId\n        userId\n        loanId\n        systemId\n        name\n        address\n        lga\n        city\n        state\n        accountNumber\n        bankName\n        telephone\n        userTelephone\n        bvnNumber\n        bvnTelephone\n        guarantorName\n        guarantorAddress\n        guarantorTelephone\n        guarantorRelationship\n        createdAt\n        updatedAt\n        assignedAt\n        weight\n        risk\n        classification\n        dnd\n        dndAt\n        tags\n       \n  }\n}",
+										"variables": "{\n  \"number\": \"8011111111\"\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "findCustomersByLoanID",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"const jsonData = pm.response.json();",
+											"const loan = '9094'",
+											"const name = \"Ruth Kadiri\"",
+											"",
+											"pm.test(\"Response is not empty\", function () {",
+											"    pm.expect(jsonData.data.findCustomersByLoanID).to.not.have.lengthOf(0);",
+											"});",
+											"",
+											"pm.test(\"Body matches string\", function () {",
+											"    pm.expect(jsonData.data.findCustomersByLoanID[0].loanId).to.eql(loan)",
+											"});",
+											"",
+											"pm.test(\"Body matches string\", function () {",
+											"    pm.expect(jsonData.data.findCustomersByLoanID[0].name).to.eql(name)",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{Admin-token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query findCustomersByLoanID ($loanID: String!, $partnerId: String) {\n    findCustomersByLoanID (loanID: $loanID, partnerId: $partnerId) {\n        id\n        partnerId\n        agentId\n        userId\n        loanId\n        systemId\n        name\n        address\n        lga\n        city\n        state\n        accountNumber\n        bankName\n        telephone\n        userTelephone\n        bvnNumber\n        bvnTelephone\n        guarantorName\n        guarantorAddress\n        guarantorTelephone\n        guarantorRelationship\n        createdAt\n        updatedAt\n        assignedAt\n        weight\n        risk\n        classification\n        dnd\n        dndAt\n        tags\n  }\n}",
+										"variables": "{\n  \"loanID\": \"9094\",\n  \"partnerId\": \"89e47c63-406f-46a6-8f4f-82af8eb963cf\"\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "searchCustomerReports",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const jsonData = pm.response.json();",
+											"",
+											"pm.test(\"Response is not empty\", function () {",
+											"    pm.expect(jsonData.data.searchCustomerReports.items).to.not.have.lengthOf(0);",
+											"});",
+											"",
+											"",
+											"",
+											"",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{Admin-token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query searchCustomerReports ($page: Page!, $q: CustomerReportsSearchRequest!) {\n    searchCustomerReports (page: $page, q: $q) {\n        items {\n            id\n            agentId\n            staffId\n            customerId\n            type\n            comment\n            hasPtp\n            meta\n            createdAt\n            updatedAt\n            customerPtps {\n                id\n                partnerId\n                customerId\n                agentId\n                customerReportId\n                loanId\n                amount\n                amountPaid\n                ptpDate\n                frequency\n                isMultiple\n                actualPaymentDate\n                paymentStatus\n                submittedBy\n                updatedBy\n                submitterKind\n                updaterKind\n                description\n                rescheduleCount\n                createdAt\n                updatedAt\n                deletedAt\n            }\n            submitterKind\n        }\n        pageInfo {\n            page\n            size\n            hasNextPage\n            hasPreviousPage\n            totalCount\n        }\n    }\n}",
+										"variables": "{\n  \"page\": {\n    \"number\": 1,\n    \"size\": 10,\n    \"sortBy\": \"created_at\",\n    \"sortDirectionDesc\": true\n  },\n  \"q\": {\n    \"agentId\": null,\n    \"customerId\": null,\n    \"partnerId\": null,\n    \"type\": \"\",\n    \"metaFilter\": null,\n    \"date\": {\n      \"from\": \"\",\n      \"to\": \"\"\n    }\n  }\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getAllbanks",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const jsonData = pm.response.json();",
+											"const bank_name = 'Wema Bank'",
+											"const bank_code = '035'",
+											"",
+											"//check that response is not empty ",
+											"pm.test(\"Response is not empty\", function () {",
+											"    pm.expect(jsonData.data.getAllBanks).to.not.have.lengthOf(0);",
+											"});",
+											"",
+											"pm.test(\"Your test name\", function () {",
+											"    pm.expect(jsonData.data.getAllBanks[0].name).to.eql(bank_name);",
+											"     pm.expect(jsonData.data.getAllBanks[0].code).to.eql(bank_code);",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{Admin-token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query {\n   getAllBanks{\n    id\n    name\n    code\n}\n}",
+										"variables": ""
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getRolePermission",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var body = JSON.parse(responseBody);",
+											"const jsonData = pm.response.json();",
+											"",
+											"//check that response is not empty ",
+											"pm.test(\"Response is not empty\", function () {",
+											"    pm.expect(jsonData.data.getRolePermission).to.not.have.lengthOf(0);",
+											"});",
+											"",
+											"pm.test(\"Body contains various roles\", function () {",
+											"    pm.expect(pm.response.text()).to.include(\"VIEW_ONLY\");",
+											"     pm.expect(pm.response.text()).to.include(\"ADMINISTRATOR\");",
+											"    pm.expect(pm.response.text()).to.include(\"TEAM_LEAD\");",
+											"     pm.expect(pm.response.text()).to.include(\"VIEW_ONLY\");",
+											"     pm.expect(pm.response.text()).to.include(\"SUPPORT\");",
+											"});",
+											"",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{Admin-token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query getRolePermission ($role: Roles) {\n    getRolePermission (role: $role) {\n        roleInt\n        role\n        permissions\n    }\n}",
+										"variables": "{\n    \n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Team Lead",
+					"item": [
+						{
+							"name": "Login as a team lead",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"//Set access token as environment variable",
+											"const jsonData = pm.response.json();",
+											"const body = JSON.parse(responseBody);",
+											"pm.environment.set(\"TLead-token\", body.data.authenticate.token);",
+											"",
+											"const id = \"a91ee13a-9d61-4244-8f81-0bd7986fda74\"",
+											"const name = \"Grace Aye\"",
+											"const kind = \"Administrator\"",
+											"const email = \"graceaye@bfree.com.ng\"",
+											"",
+											"pm.test(\"Body contains user Id \", function () {",
+											"    pm.expect(jsonData.data.authenticate.user.id).to.eql(id);",
+											"});",
+											"",
+											"pm.test(\"Body contains name \", function () {",
+											"    pm.expect(jsonData.data.authenticate.user.name).to.eql(name);",
+											"});",
+											"",
+											"pm.test(\"Body contains kind \", function () {",
+											"    pm.expect(jsonData.data.authenticate.user.kind).to.eql(kind);",
+											"});",
+											"",
+											"pm.test(\"Body contains email \", function () {",
+											"    pm.expect(jsonData.data.authenticate.user.email).to.eql(email);",
+											"});",
+											"",
+											"",
+											"pm.test(\"Content-Type is present\", function () {",
+											"    pm.response.to.have.header(\"Content-Type\");",
+											"});",
+											"",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query authenticate($email: String!, $password: String!) {\n  authenticate(email:$email, password:$password){\n    token\n    refresh\n    user {\n        id\n        name\n        kind\n        state\n        email\n    }\n    accessTokenExpiry\n  }\n}",
+										"variables": "{\n    \"email\" : \"graceaye@bfree.com.ng\",\n    \"password\" : \"TwalegbogboComputerVillage11\"\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Team lead can not create agents for partners they are not assigned to",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"//Set access token as environment variable",
+											"const jsonData = pm.response.json();",
+											"",
+											"const error_message =  \"you are not authorized\"",
+											"",
+											"",
+											"pm.test(\"User is not authorized to carry out this action \", function () {",
+											"    pm.expect(jsonData.errors[0].message).to.eql(error_message)",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{TLead-token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "mutation createUser ($input: UserRequest!) {\n    createUser (input: $input) {\n        id\n        name\n        email\n        telephone\n        address\n        state\n        lga\n        region\n        kind\n        createdAt\n        updatedAt\n        agent {\n            id\n            userId\n            designation\n            commission\n            commissionTarget\n            settlementBankName\n            settlementBankAccountNumber\n            settlementBankAccountName\n            kind\n            active\n            updatedAt\n            staffId\n            smsLimit\n            updatedBy\n            partnerIds\n            partners {\n                id\n                userId\n                name\n                description\n                website\n                logoUrl\n                accountNumber\n                accountName\n                bankName\n                active\n                settings\n                createdAt\n                updatedAt\n            }\n            extensionNumber\n            performance {\n                totalEarnings\n                totalCollections\n                totalUnpaidCommissions\n                totalUnpaidCommissionsFrom\n                totalUnpaidCommissionsTo\n            }\n            collection {\n                id\n                agentId\n                reportId\n                agentCommissionPercentage\n                agentCommissionAmount\n                partnerCommissionPercentage\n                partnerCommissionAmount\n                amount\n                description\n                balanceBefore\n                balanceAfter\n                paidAfter\n                settled\n                createdAt\n                agent {\n                    id\n                    userId\n                    designation\n                    commission\n                    commissionTarget\n                    settlementBankName\n                    settlementBankAccountNumber\n                    settlementBankAccountName\n                    kind\n                    active\n                    updatedAt\n                    staffId\n                    smsLimit\n                    updatedBy\n                    partnerIds\n                    partners {\n                        id\n                        userId\n                        name\n                        description\n                        website\n                        logoUrl\n                        accountNumber\n                        accountName\n                        bankName\n                        active\n                        settings\n                        createdAt\n                        updatedAt\n                    }\n                    extensionNumber\n                    performance {\n                        totalEarnings\n                        totalCollections\n                        totalUnpaidCommissions\n                        totalUnpaidCommissionsFrom\n                        totalUnpaidCommissionsTo\n                    }\n                }\n                customer {\n                    id\n                    partnerId\n                    agentId\n                    userId\n                    loanId\n                    systemId\n                    name\n                    address\n                    lga\n                    city\n                    state\n                    accountNumber\n                    bankName\n                    telephone\n                    userTelephone\n                    bvnNumber\n                    bvnTelephone\n                    guarantorName\n                    guarantorAddress\n                    guarantorTelephone\n                    guarantorRelationship\n                    createdAt\n                    updatedAt\n                    assignedAt\n                    weight\n                    risk\n                    classification\n                    dnd\n                    dndAt\n                    tags\n                    partner {\n                        id\n                        userId\n                        name\n                        description\n                        website\n                        logoUrl\n                        accountNumber\n                        accountName\n                        bankName\n                        active\n                        settings\n                        createdAt\n                        updatedAt\n                    }\n                    agent {\n                        id\n                        userId\n                        designation\n                        commission\n                        commissionTarget\n                        settlementBankName\n                        settlementBankAccountNumber\n                        settlementBankAccountName\n                        kind\n                        active\n                        updatedAt\n                        staffId\n                        smsLimit\n                        updatedBy\n                        partnerIds\n                        extensionNumber\n                    }\n                    gender\n                    email\n                    notifyByEmail\n                    dob\n                    registeredTelephoneNumber\n                    otpPinId\n                    lastLoggedIn\n                    balanceRemaining\n                    plan {\n                        id\n                        planDaily\n                        planWeekly\n                        planMonthly\n                        planYearly\n                        note\n                        createdAt\n                        updatedAt\n                    }\n                    instalments {\n                        id\n                        customerId\n                        loanId\n                        loanInstalmentId\n                        totalAmountToRepay\n                        totalAmountAutoDebit\n                        selfPayment\n                        paidAfter\n                        repaid\n                        createdAt\n                        campaign\n                        dueDate\n                        disbursementDate\n                        originalAmountToPay\n                        originalPrincipalToPay\n                        originalInterestToPay\n                        originalLateFees\n                        amountToPayIncludingFees\n                        customerDiscount\n                        numberOfInstalments\n                        daysLate\n                        enteredAt\n                        updatedAt\n                        deletedAt\n                        completed\n                        amountCollected\n                        amountPreviouslyPaidByCustomer\n                    }\n                    reports {\n                        id\n                        agentId\n                        staffId\n                        customerId\n                        type\n                        comment\n                        hasPtp\n                        meta\n                        createdAt\n                        updatedAt\n                        submitterKind\n                    }\n                    collections {\n                        id\n                        agentId\n                        reportId\n                        agentCommissionPercentage\n                        agentCommissionAmount\n                        partnerCommissionPercentage\n                        partnerCommissionAmount\n                        amount\n                        description\n                        balanceBefore\n                        balanceAfter\n                        paidAfter\n                        settled\n                        createdAt\n                    }\n                    channel\n                    alternateNumber\n                    maritalStatus\n                    stateOfOrigin\n                    lgaOfOrigin\n                    nextOfKinName\n                    nextOfKinAddress\n                    nextOfKinTelephone\n                    employmentStatus\n                    businessName\n                    businessAddress\n                    monthlyNetIncome\n                    annualNetIncome\n                    customerBankName\n                    customerAccountName\n                    customerAccountNumber\n                    meansOfIdentification\n                    utilityBill\n                }\n            }\n        }\n        admin {\n            designation\n            role\n            active\n            readOnly\n            updatedAt\n        }\n        permission\n    }\n}",
+										"variables": "{\n  \"input\": {\n    \"name\": \"Mary Jane\",\n    \"email\": \"Tmoxn@yahoo.com\",\n    \"password\": \"P@ssword01\",\n    \"address\": \"\",\n    \"telephone\": \"\",\n    \"kind\": 2,\n    \"state\": \"\",\n    \"lga\": \"\",\n    \"region\": \"\",\n    \"agent\": {\n      \"commission\": 2.00,\n        \"kind\": 2,\n      \"designation\": \"\",\n      \"settlementBankName\": \"\",\n      \"settlementBankAccountNumber\": \"\",\n      \"settlementBankAccountName\": \"\",\n      \"partnerIds\": [\n        \"bf5b428b-d646-4d2d-82f4-ab370cb4a524\"\n      ],\n      \"extensionNumber\": \"\",\n      \"smsLimit\": 0\n    }\n  }\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "searchTeamLeadNotifications",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var body = JSON.parse(responseBody);",
+											"const jsonData = pm.response.json();",
+											"",
+											"//check that response is not empty ",
+											"pm.test(\"Response Body is not empty\", function () {",
+											"    pm.expect(jsonData.data.searchTeamLeadNotifications.items).to.not.have.lengthOf(0);",
+											"});",
+											"",
+											"",
+											"pm.test(\"Body contains distinct case ptp\", function () {",
+											"    pm.expect(pm.response.text()).to.include(\"distinct_case_ptp_kind\");",
+											"});",
+											"",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{TLead-token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query searchTeamLeadNotifications ($q: SearchTeamLeadNotificationRequest) {\n    searchTeamLeadNotifications (q: $q) {\n        items {\n            id\n            partnerId\n            customerId\n            customerName\n            agentId\n            loanId\n            kind\n            message\n            read\n            createdAt\n            notifyAt\n        }\n        pageInfo {\n            page\n            size\n            hasNextPage\n            hasPreviousPage\n            totalCount\n        }\n    }\n}",
+										"variables": "{\n  \"q\": {\n    \"page\": {\n      \"number\": 1,\n      \"size\": 10,\n      \"sortBy\": \"created_at\",\n      \"sortDirectionDesc\": true\n    },\n    \"readOnly\": \"\",\n    \"kind\": \"\"\n  }\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url }}",
+									"host": [
+										"{{url }}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "3CX",
+			"item": [
+				{
+					"name": "get customer by phone number",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"",
+									"  const jsonData = pm.response.json();",
+									"  const phone_number = \"8109023376\"",
+									"  const customer_name = \"Kehinde Odetola\"",
+									"  const loanId = \"3476258\"",
+									"",
+									"pm.test(\"Body contains loanId\", function () {",
+									"    pm.expect(jsonData.data.loan_id).to.eql(loanId);",
+									"});",
+									"",
+									"pm.test(\"Body contains customer phonenumber\", function () {",
+									"    pm.expect(jsonData.data.user_telephone).to.eql(phone_number);",
+									"});",
+									"",
+									"pm.test(\"Body contains customer name\", function () {",
+									"    pm.expect(jsonData.data.name).to.eql(customer_name);",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://staging-backend.bfree.com.ng/api/v1/callback/customer/lookup/8109023376",
+							"protocol": "https",
+							"host": [
+								"staging-backend",
+								"bfree",
+								"com",
+								"ng"
+							],
+							"path": [
+								"api",
+								"v1",
+								"callback",
+								"customer",
+								"lookup",
+								"8109023376"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Partners API",
+			"item": [
+				{
+					"name": "create customer with incorrect due date format",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//Set access token as environment variable",
+									"const jsonData = pm.response.json();",
+									"",
+									"const error_message = \"date_of_birth date supplied is invalid - use date format DD/MM/YYYY only\"",
+									"",
+									"",
+									"pm.test(\"incorrect due date format\", function () {",
+									"    pm.expect(jsonData.validation.date_of_birth).to.eql(error_message)",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "NAOZBA7HHFLASJTWCYNJ"
+							},
+							{
+								"key": "x-signature",
+								"value": "d82561e5d13f5089de4904f84b8f4f863f241bf981d6464974d0829935b39d3f"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"reference\": \"ref869711\",\n    \"loan_id\": \"909419\",\n    \"name\": \"Ruth Kadiri\",\n    \"account_number\": \"23456727670\",\n    \"bank_name\": \"UBA\",\n    \"bvn_telephone\": \"9056781399\",\n    \"disbursement_date\": \"25/08/2020\",\n    \"due_date\": \"01/01/2021\",\n    \"guarantor_name\": \"Anibaba Saliu\",\n    \"guarantor_telephone\": \"8021200108\",\n    \"principal_amount\": 50000,\n    \"interest_amount\": 5500,\n     \"amount_repaid\": 0,\n    \"sign_up_telephone\": \"9056781399\",\n    \"total_amount_to_repay\": 50000,\n    \"user_telephone\": \"9056781390\",\n    \"email\": \"oolajide91@yahoo.com\",\n    \"bvn_number\": \"2225676540\",\n     \"gender\": \"male\",\n    \"late_fees\": 30.00,\n    \"date_of_birth\": \"1997/07/07\",\n    \"employer_name\": \"LALA\",\n    \"user_id\": \"12345332233\"\n}"
+						},
+						"url": {
+							"raw": "https://staging-backend.bfree.com.ng/api/v1/partner/customer",
+							"protocol": "https",
+							"host": [
+								"staging-backend",
+								"bfree",
+								"com",
+								"ng"
+							],
+							"path": [
+								"api",
+								"v1",
+								"partner",
+								"customer"
+							]
+						},
+						"description": "This endpoint makes it possible for our partners to push new customers to our platform."
+					},
+					"response": []
+				},
+				{
+					"name": "create customer with incorrect telephone number for nigeria",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//Set access token as environment variable",
+									"const jsonData = pm.response.json();",
+									"",
+									"const bvn_telephone_error_message = \"bvn_telephone number must be 10\"",
+									"const sign_up_telephone_error_message = \"sign_up_telephone number must be 10\"",
+									"const user_telephone_error_message = \"user_telephone number must be 10\"",
+									"",
+									"pm.test(\"incorrect telephone length\", function () {",
+									"    pm.expect(jsonData.validation.bvn_telephone).to.eql(bvn_telephone_error_message);",
+									"    pm.expect(jsonData.validation.sign_up_telephone).to.eql(sign_up_telephone_error_message);",
+									"     pm.expect(jsonData.validation.user_telephone).to.eql(user_telephone_error_message);",
+									"     ",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "NAOZBA7HHFLASJTWCYNJ"
+							},
+							{
+								"key": "x-signature",
+								"value": "d82561e5d13f5089de4904f84b8f4f863f241bf981d6464974d0829935b39d3f"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"reference\": \"ref869711\",\n    \"loan_id\": \"909419\",\n    \"name\": \"Ruth Kadiri\",\n    \"account_number\": \"23456727670\",\n    \"bank_name\": \"UBA\",\n    \"bvn_telephone\": \"905678139\",\n    \"disbursement_date\": \"25/08/2020\",\n    \"due_date\": \"01/01/2021\",\n    \"guarantor_name\": \"Anibaba Saliu\",\n    \"guarantor_telephone\": \"8021200108\",\n    \"principal_amount\": 50000,\n    \"interest_amount\": 5500,\n     \"amount_repaid\": 0,\n    \"sign_up_telephone\": \"905678139\",\n    \"total_amount_to_repay\": 50000,\n    \"user_telephone\": \"905678139\",\n    \"email\": \"oolajide91@yahoo.com\",\n    \"bvn_number\": \"2225676540\",\n     \"gender\": \"male\",\n    \"late_fees\": 30.00,\n    \"date_of_birth\": \"01/01/1997\",\n    \"employer_name\": \"LALA\",\n    \"user_id\": \"12345332233\"\n}"
+						},
+						"url": {
+							"raw": "https://staging-backend.bfree.com.ng/api/v1/partner/customer",
+							"protocol": "https",
+							"host": [
+								"staging-backend",
+								"bfree",
+								"com",
+								"ng"
+							],
+							"path": [
+								"api",
+								"v1",
+								"partner",
+								"customer"
+							]
+						},
+						"description": "This endpoint makes it possible for our partners to push new customers to our platform."
+					},
+					"response": []
+				},
+				{
+					"name": "Risk level field should accept High or Low value on create api endpoint for partners",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//Set access token as environment variable",
+									"const jsonData = pm.response.json();",
+									"",
+									"const risk = \"Low\"",
+									"loan_instalment_id = 'AUTO_909419'",
+									"",
+									"pm.test(\"incorrect telephone length\", function () {",
+									"    pm.expect(jsonData.data.risk_level).to.eql(risk);",
+									"     ",
+									"});",
+									"",
+									"",
+									"//check that response is not empty ",
+									"pm.test(\"customer has instalment\", function () {",
+									"    pm.expect(jsonData.data.instalments).to.not.have.lengthOf(0);",
+									"});",
+									"",
+									"",
+									"//check that customer has a loan installment id  ",
+									"pm.test(\"customer has a loan instalment id \", function () {",
+									"    pm.expect(jsonData.data.instalments[0].loan_instalment_id).to.eql(loan_instalment_id)",
+									"});",
+									"",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "NAOZBA7HHFLASJTWCYNJ"
+							},
+							{
+								"key": "x-signature",
+								"value": "d82561e5d13f5089de4904f84b8f4f863f241bf981d6464974d0829935b39d3f"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"reference\": \"ref869711\",\n    \"loan_id\": \"909419\",\n    \"name\": \"Ruth Kadiri\",\n    \"account_number\": \"23456727670\",\n    \"bank_name\": \"UBA\",\n    \"bvn_telephone\": \"9056781399\",\n    \"disbursement_date\": \"25/08/2020\",\n    \"due_date\": \"01/01/2021\",\n    \"guarantor_name\": \"Anibaba Saliu\",\n    \"guarantor_telephone\": \"8021200108\",\n    \"principal_amount\": 50000,\n    \"interest_amount\": 5500,\n     \"amount_repaid\": 0,\n    \"sign_up_telephone\": \"9056781399\",\n    \"total_amount_to_repay\": 50000,\n    \"user_telephone\": \"9056781390\",\n    \"email\": \"oolajide91@yahoo.com\",\n    \"bvn_number\": \"2225676540\",\n     \"gender\": \"male\",\n    \"late_fees\": 30.00,\n    \"date_of_birth\": \"01/01/1997\",\n    \"employer_name\": \"LALA\",\n    \"user_id\": \"12345332233\",\n    \"risk_level\": \"Low\"\n}"
+						},
+						"url": {
+							"raw": "https://staging-backend.bfree.com.ng/api/v1/partner/customer",
+							"protocol": "https",
+							"host": [
+								"staging-backend",
+								"bfree",
+								"com",
+								"ng"
+							],
+							"path": [
+								"api",
+								"v1",
+								"partner",
+								"customer"
+							]
+						},
+						"description": "This endpoint makes it possible for our partners to push new customers to our platform."
 					},
 					"response": []
 				}
