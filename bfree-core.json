@@ -58,7 +58,7 @@
 									"const body = JSON.parse(responseBody);",
 									"const jsonData = pm.response.json();",
 									"const partner_name = 'Renmoney'",
-									"const phone_number ='9032651887'",
+									"const phone_number ='903265188'",
 									"const customer_name = 'Jude '",
 									"const customer_id = '2bddbdc6-dd9d-4378-b90e-893907ef2c71'",
 									"const loan = \"2348062411648\"",
