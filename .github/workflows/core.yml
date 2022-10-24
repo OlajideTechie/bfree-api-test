@@ -25,7 +25,7 @@ jobs:
     # Make directory to upload the test results
     - name: Make Directory for results
       run: |
-        mkdir -p testResults
+        mkdir -p apiTest
 
     # Run the collection
     #- name: Run Integration Tests
@@ -45,8 +45,8 @@ jobs:
     - name: Output the run Details
       uses: actions/upload-artifact@v2
       with: 
-       name: TestReports
-       path: testResults
+       name: Reports
+       path: apiTest
 
    # - name: Email
      # if: always()
