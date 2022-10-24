@@ -16,7 +16,7 @@ jobs:
     - name: Install Node
       uses: actions/setup-node@v3
       with:
-        node-version: '16.x'
+        node-version: '19.x'
     
     # Install the newman command line utility and also install the html extra reporter
     - name: Install newman dependencies
@@ -36,8 +36,14 @@ jobs:
        
     - name: Generate Report
       run: |
-       newman run bfree-core.json -e core-environment.json -r htmlextra --reporter-htmlextra-export testResults/core-api-testReport.html --reporter-htmlextra-darkTheme
-       
+       newman run bfree-core.json -e core-environment.json -r htmlextra --reporter-htmlextra-export testResults/htmlreport.html --reporter-htmlextra-darkTheme  > testResults/runreport1.html
+      #Upload the contents of Test Results directory to workspace
+    - name: Output the run Details
+      uses: actions/upload-artifact@v2
+      with:
+         name: TestReports
+         path: testResults
+
     # Upload the contents of Test Results directory to workspace
     - name: Output the run Details
       uses: actions/upload-artifact@v2
