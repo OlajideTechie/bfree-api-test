@@ -1,13 +1,35 @@
 # Starter pipeline
-- master
-
-pool:
-  vmImage: ubuntu-latest
-
-steps:
-- script:  npm install -g newman
-           npm install -g newman-reporter-htmlextra
-  displayName: 'Install newman dependencies'
-
-- script:  newman run bfree-core.json -e core-environment.json
-  displayName: 'Run api Test'
+ # Start with a minimal pipeline that you can customize to build and deploy your code.
+ # Add steps that build, run tests, deploy, and more:
+ # https://aka.ms/yaml
+ trigger:
+ - master
+ pool:
+   vmImage: ubuntu-latest
+ steps:
+   - task: Npm@1
+     displayName: "Install Newman"
+     inputs:
+       command: 'custom'
+       customCommand: 'install -g newman'
+   - task: Npm@1
+     displayName: "Install Newman Reporter"
+     inputs:
+       command: 'custom'
+       customCommand: 'install -g newman-reporter-htmlextra'
+   - task: CmdLine@2
+     displayName: "Run API Script"
+     inputs:
+      script: 
+       newman run bfree-core.json -e core-environment.json -r ,htmlextra,cli
+   - task: UploadPostmanHtmlReport@1
+     displayName: 'Upload Postman Html Report'
+     continueOnError: true
+     condition: succeededOrFailed()
+     inputs:
+      cwd: '$(System.DefaultWorkingDirectory)'
+   - task: PublishTestResults@2
+     inputs:
+      testResultsFormat: 'JUnit'
+      testResultsFiles: '**/TEST-*.xml'
+      testRunTitle: 'Result'
